@@ -1,1 +1,1 @@
-# EMS_FYP
+# Event Management System
