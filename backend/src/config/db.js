@@ -1,13 +1,14 @@
 const mysql = require('mysql2/promise');
+require('dotenv').config
 
 const pool = mysql.createPool({
-    host: 'localhost',
-    user:'root',
-    password:'root@2081',
-    database:'evenera_db',
-    connectionLimit:10,
-    queueLimit:5,
-    waitForConnections:true
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_DATABASE,
+    connectionLimit:parseInt(process.env.DB_CONNECTION),
+    queueLimit:parseInt(process.env.DB_QUEUE_LIMIT),
+    waitForConnections:process.env.DB_WAIT_FOR_CONNECTIONS === 'true'
 })
 
 module.exports = pool
