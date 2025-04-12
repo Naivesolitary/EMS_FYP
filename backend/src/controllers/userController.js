@@ -1,53 +1,58 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const asyncErrorHandler = require('../utils/asyncErrorHandler');
+const sendResponse = require('../utils/sendResponse')
+const ApiError = require('../utils/ApiError')
 require('dotenv').config();
 const {saveUser,getUser,getAllUser, getUserByid,addToBlacklist,getBlacklist}  = require('../models/userModel')
 const {generateToken,generateRefreshToken} = require('../middlewares/jwt')
 
-const allUsers = async(req,res) => {
+const allUsers = asyncErrorHandler(async(req,res) => {
     const users = await getAllUser();
-    res.json({users})
+    if(!users) throw new ApiError(404,'Users not Found')
+    sendResponse(res,{data:users})
+
+    // res.json({users})
 
 
-}
-const createUser = async (req,res) => {
-    try{
+});
+const createUser =  asyncErrorHandler(async (req,res) => {
+   
 
         const user = req.body;
         const saltsRound = 10; // Password hashing
         const hashedPassword = await bcrypt.hash(user.password,saltsRound)
         user.password = hashedPassword;
-        const msg = await saveUser(user)
-        const payload = {id:msg.id,email: msg.email,role:msg.role}
-        const token = generateToken(payload)
-        console.log('Generated Token: ', token)
-        res.json({msg,token})
-    }catch(error){
-        console.error('error while saving user data: ', error)
-        res.status(505).json({message: 'sign up failed'})
-    }
+        const userData = await saveUser(user)
+        if(!userData) throw new ApiError(500,'Signup failed')
+        const payload = {id:userData.id,email: userData.email,role:userData.role}
+        const accessToken = generateToken(payload);
+        const refreshToken = generateRefreshToken(payload);
+        res.cookie('refreshToken',refreshToken,{
+            httpOnly:true,
+            maxAge: 7 * 24 * 60* 1000 // 7 days in milliseconds
+         })
+        console.log('Generated Token: ', accessToken)
+        sendResponse(res,{statusCode:201,data:{userData,tokens:{accessToken,refreshToken}},message:'User created Successfully'})
 
-
-
-
-}
+})
 
 //     Refresh Token
 
-const refreshToken = async(req,res) => {
+const newAccessToken = asyncErrorHandler(async(req,res) => {
    
     const refreshToken = req.cookies.refreshToken; // Get refresh token from HTTP-only cookie
-    if (!refreshToken){
-        return  res.status(401).json({error:'Refresh token not found!!'})
-    }
+    if (!refreshToken) throw new ApiError(401,'Refresh token not found!!')
+    
 
     const isBlacklisted = await getBlacklist(refreshToken,'refresh');
-    if(isBlacklisted)  return res.status(403).json({ message: 'Refresh token has been revoked' });
+    if(isBlacklisted)  throw new ApiError(403,'Refresh token has been revoked');
 
-    try{
+    
 
 
         const decoded = jwt.verify(refreshToken,process.env.JWT_SECRET);
+        if(!decoded) throw new ApiError(403,'Invalid refresh token')
 
         const newAccessToken = generateToken({
             id:decoded.id,
@@ -55,37 +60,52 @@ const refreshToken = async(req,res) => {
             role: decoded.role
         });
 
-        res.json({accessToken:newAccessToken})
-    }catch(error){
-        console.error(error);
-        return res.status(403).json({ error: 'Invalid refresh token' });
+        sendResponse(res,{statusCode:201,data:{newAccessToken},message:'new Access Token generated successfully'})
+        
+})
 
-    }
 
+const viewProfile = asyncErrorHandler(async (req,res) => {
+ 
+        const userData = req.decoded;
+        console.log('User Data hi: ',userData)
+        const user = await getUserByid(userData.id)
+        if(!user) throw new ApiError(404,'User not found')
+        sendResponse(res,{data:user})
+ 
+
+})
+
+
+/// this is for testing
+
+const getUserById = asyncErrorHandler(async (req,res) => {
+    // try{
+        const user_id = req.params.id;
+        console.log('User Data: ',user_id)
+        const user = await getUserByid(user_id)
+        if(!user) throw new ApiError(404,'User not Found')
+        sendResponse(res,{data:user,message:'User info fetched successfully'})
+    // }catch(error){
+        // console.error('error while fetching: ', error)
+        // res.status(505).json({message: 'fetching failed'})
+// }
     
 
+})
 
-}
 
-const viewProfile = async (req,res) => {
-    try{
-        const userData = req.decoded;
-        console.log('User Data: ',userData)
-        const user = await getUserByid(userData.id)
-        res.json({user})
-    }catch(error){
-        console.error('error while fetching: ', error)
-        res.status(505).json({message: 'fetching failed'})
-    }
 
-}
 
-const verifyUser = async(req,res) => {
+/// =============================
 
-    try{
+
+const verifyUser = asyncErrorHandler(async(req,res) => {
+
+
     const creds = req.body
      const user =  await getUser(creds)
-     if(!user)  return res.status(401).json({ message: 'Invalid Credentials' });
+     if(!user)  throw new ApiError(404,'User not found, create an account');
      const payload = {
         id: user.id,
         email: user.email,
@@ -98,23 +118,18 @@ const verifyUser = async(req,res) => {
         httpOnly:true,
         maxAge: 7 * 24 * 60* 1000 // 7 days in milliseconds
      })
-     res.json({accessToken,refreshToken})
-    } catch(error){
-        console.error('Error: ', error)
-        res.status(500).json({error: 'Internal Server Error'})
-    }
-    
-    
+     sendResponse(res,{data:{accessToken,refreshToken},message:'Login Successfully'})
+      
 
 
-}
+})
 
 
 
 
 
-const logout = async(req,res) => {
-    try{
+const logout = asyncErrorHandler(async(req,res) => {
+
         const accessToken = req.token;
         const refreshToken = req.cookies.refreshToken
 
@@ -124,7 +139,8 @@ const logout = async(req,res) => {
             const decoded = jwt.decode(accessToken);
 
             if(!decoded || !decoded.exp){
-                return res.status(400).json({ message: 'Invalid token structure' });
+                throw new ApiError(400,'Invalid Access token structure')
+               
             }
             const expiryDate = new Date(decoded.exp * 1000); //Converted to milliseconds
             await addToBlacklist(accessToken,expiryDate)
@@ -134,7 +150,7 @@ const logout = async(req,res) => {
         if(refreshToken){
             const decoded = jwt.decode(refreshToken);
             if (!decoded || !decoded.exp) {
-                return res.status(400).json({ message: 'Invalid refresh token structure' });
+                throw new ApiError(400,'Invalid Refresh token structure')
             }
             const expiryDate = new Date(decoded.exp * 1000);
             await addToBlacklist(refreshToken, expiryDate, 'refresh');
@@ -146,20 +162,13 @@ const logout = async(req,res) => {
         })
         console.log('Refresh token cookie cleared');
 
-
-       return res.status(200).json({message:'Logout Successfully'})
-    }
-
-    }catch(error){
-        console.error('Logout Error: ', error);
-        res.status(500).json({ message: 'Something went wrong during logout' });
-
-    }
-
-}
+       sendResponse(res,{message:'Logout Successfully'})
+   
+        }
+})
 
 module.exports = {
 createUser, verifyUser,
 allUsers,viewProfile,
- refreshToken, logout
+ newAccessToken, logout,getUserById
 }
