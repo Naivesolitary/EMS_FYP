@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react'
 import CollapsibleSection from '../components/CollapsibleSection';
 import Datetime from 'react-datetime';
 import "react-datetime/css/react-datetime.css";
-import { MdOutlineCancel } from "react-icons/md";
+// import { MdOutlineCancel } from "react-icons/md";
 import { MdOutlineDeleteForever as Delete } from "react-icons/md";
+import { AiOutlineClose } from "react-icons/ai";
 import { IoMdAdd } from "react-icons/io";
 // import { v4 as uuidv4 } from 'uuid'; 
 import uuid from 'uuid4'
@@ -13,6 +14,7 @@ import CustomSelectDropdown from '../components/CustomSelectDropdown';
 
 export default function CreateEvent() {
     const [images,setImages] = useState([])
+    const [eventDetails,setEventDetails] = useState({});
     const [eventDesc,setEventDesc] = useState('')
     const [selectCategory, setSelectedCategory] = useState('')
     const [selectVenue, setSelectedVenue] = useState('')
@@ -29,6 +31,12 @@ export default function CreateEvent() {
             // console.log(files)
 
     }
+
+    const removeImage = (indexToRemove) => {
+      const updatedImages = images.filter((_, index) => index !== indexToRemove);
+      
+      setImages(updatedImages);}
+    
 
     const addTicket = () => {
         // console.log(e)
@@ -100,22 +108,31 @@ export default function CreateEvent() {
                 </label>
                 </div>
                   {/* Image preview section */}
-            <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4  p-4 rounded ">
-        {images.map((img, index) => (
-           <div 
-           key={index}
-      className="aspect-[4/3] w-full overflow-hidden rounded shadow border border-red-500"
-           > 
-          <img
-            key={index}
-            src={img.url}
-            alt={`upload-preview-${index}`}
-            className="w-full h-full object-cover object-center rounded shadow border  border-red-500"
-          />
-          <MdOutlineCancel/>
-          </div>
-        ))}
-      </div>
+           {/* Image preview section - Modified for larger images */}
+           <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-4 rounded">
+  {images.map((img, index) => (
+    <div 
+      key={index}
+      className="group aspect-[4/3] w-full overflow-hidden rounded-lg shadow-lg border-2 border-gray-200 relative hover:border-gray-400 transition-all"
+    > 
+      <img
+        src={img.url}
+        alt={`upload-preview-${index}`}
+        className="w-full h-full object-cover object-center group-hover:brightness-90 transition-all"
+      />
+      <button 
+        className="absolute top-2 right-2 bg-black/80 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gray-500"
+        onClick={(e) => {
+          e.stopPropagation();
+          removeImage(index);
+        }}
+      >
+        <AiOutlineClose size={15} />
+      </button>
+    </div>
+  ))}
+</div>
+
             
             
         </div>
@@ -338,9 +355,13 @@ export default function CreateEvent() {
             />
           </div>))}
 
+       
+    
+
+         
             {/* "+X more" indicator - INSIDE the grid container */}
-    {images.length > 4 && (
-      <div className="rounded bg-gray-100 aspect-square flex items-center justify-center">
+    {images.length >= 4 && (
+      <div className="w-20 h-20 rounded bg-gray-100 aspect-square flex items-center justify-center">
         <span className="text-gray-600 font-medium">
           +{images.length - 4}
         </span>
