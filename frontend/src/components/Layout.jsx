@@ -1,6 +1,7 @@
 import React from 'react'
 import NavMenu from './NavMenu'
 import { Outlet } from 'react-router-dom'
+import Footer from './Footer'
 
 export default function Layout({children}) {
   return (
@@ -10,7 +11,7 @@ export default function Layout({children}) {
       <main className="flex-grow">
       <Outlet/>
       </main>
-      {/* Footer can be added here if needed */}
+      <Footer/>
     </div>
       
    

@@ -1,10 +1,17 @@
 import React, { useEffect, useState } from 'react'
 import CollapsibleSection from '../components/CollapsibleSection';
+import DatePicker from 'react-datepicker';
 import Datetime from 'react-datetime';
 import "react-datetime/css/react-datetime.css";
 // import { MdOutlineCancel } from "react-icons/md";
 import { MdOutlineDeleteForever as Delete } from "react-icons/md";
+import { GoPeople as People } from "react-icons/go";
+import { CiLocationOn as Location } from "react-icons/ci";
+import { LuTicketSlash as Ticket } from "react-icons/lu";
 import { AiOutlineClose } from "react-icons/ai";
+import { FiTag as Tag } from "react-icons/fi";
+import { CiCalendar as Calender } from "react-icons/ci";
+import { FaRegFileLines as Text } from "react-icons/fa6";
 import { IoMdAdd } from "react-icons/io";
 // import { v4 as uuidv4 } from 'uuid'; 
 import uuid from 'uuid4'
@@ -12,15 +19,28 @@ import moment from 'moment';
 import CustomSelectDropdown from '../components/CustomSelectDropdown';
 
 
+
 export default function CreateEvent() {
     const [images,setImages] = useState([])
-    const [eventDetails,setEventDetails] = useState({});
-    const [eventDesc,setEventDesc] = useState('')
-    const [selectCategory, setSelectedCategory] = useState('')
-    const [selectVenue, setSelectedVenue] = useState('')
-    const [tickets,setTicket] = useState([{id:uuid(),type:''}]);
-    const [startDate, setStartDate] = useState(null);
-    const [endDate, setEndDate] = useState(null);
+
+    const [tickets,setTicket] = useState([{id:uuid(),type:'Standard',quantity:100,price:100}]);
+    console.log(tickets);
+    const [event,setEvent] = useState(
+      {title:'',description:'' ,category:'',
+        startDate:moment(),endDate:moment(),venue:'',tickets:tickets ,maxAttendees:''
+
+      });
+ 
+      console.log(event.startDate)
+
+    // Sync tickets with eventDetails
+    useEffect(() => {  
+      setEvent(prev => ({
+        ...prev,
+        tickets: tickets
+      }));
+    }, [tickets]);
+    
    
     const dragndrop_handler = (e) => {
         
@@ -43,13 +63,14 @@ export default function CreateEvent() {
         setTicket(prev => [...prev,{id:uuid(),type:''}])
     }
 
-    const handleTicketType = (id, value) => {
-          setTicket(prevTicket => prevTicket.map(ticket => ticket.id === id ? {...ticket,type:value}: ticket))
+    const handleTicketType = (id,updateField) => {
+        
+          setTicket(prevTicket => prevTicket.map(ticket => ticket.id === id ? {...ticket,...updateField}: ticket))
 
     }
 
     const handleDelete = (ticket_id) => {
-      setTicket(prev => prev.filter(fil_ticket => ticket_id !== fil_ticket.id ))
+      setTicket(prev => prev.filter((fil_ticket,index) => index=== 0 || ticket_id !== fil_ticket.id ))
 
 
     }
@@ -68,6 +89,22 @@ export default function CreateEvent() {
         updateImages(files)
     }
 
+    const getTicketTypeColor = (type) => {
+      switch (type) {
+        case "vip":
+          return "bg-purple-100 px-1 text-purple-800 border-purple-200"
+        case "early bird":
+          return "bg-blue-100 px-1 text-blue-800 border-blue-200"
+        case "standard":
+          return "bg-green-100 px-1 text-green-800 border-green-200"
+        case "free":
+          return "bg-gray-100 px-1 text-gray-800 border-gray-200"
+        default:
+          return "bg-gray-100 px-1 text-gray-800 border-gray-200"
+      }
+    }
+
+   const eventPropSetter = (prop) => setEvent((prev) => ({...prev,...prop}))
     const updateImages = (files) => {
         const imageFiles = files.filter(file => file.type.startsWith('image/'));
         const imagePreviews = imageFiles.map(file => ({
@@ -108,7 +145,7 @@ export default function CreateEvent() {
                 </label>
                 </div>
                   {/* Image preview section */}
-           {/* Image preview section - Modified for larger images */}
+         
            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-4 rounded">
   {images.map((img, index) => (
     <div 
@@ -141,20 +178,21 @@ export default function CreateEvent() {
         <CollapsibleSection title={'Basic Information'}>
                     <div>
                         <label htmlFor="title" className="block font-medium">Event Title *</label>
-                         <input  type="text" id="title" className="w-full border px-3 py-2 rounded" placeholder="Enter event title"/>
+                         {/* <input  type="text" id="title" onInput={(e) => setEvent(prev => ({...prev, eventTitle: e.target.value}))} className="w-full border px-3 py-2 rounded" placeholder="Enter event title"/> */}
+                         <input  type="text" id="title" onInput={(e) => eventPropSetter({title:e.target.value})} className="w-full border px-3 py-2 rounded" placeholder="Enter event title"/>
                     </div>
 
                     <div>
                         <label htmlFor="description" className="block font-medium">Description *</label>
-                        <textarea onInput={(e) => setEventDesc(e.target.value )} id="description" className="w-full border px-3 py-2 rounded" placeholder="Describe your event"></textarea>
+                        <textarea onInput={(e) => eventPropSetter({description: e.target.value})} id="description" className="w-full border px-3 py-2 rounded" placeholder="Describe your event"></textarea>
                     </div>
 
                      <CustomSelectDropdown
                       label={'Category'}
                       name={'category'}
-                      value={selectCategory}
+                      value={event.category}
                       options={['Conference','Concert','Networking','Workshop']}
-                      onChange={(e) => setSelectedCategory(e.target.value)} required
+                      onChange={(e) => eventPropSetter({category:e.target.value})} required
                       
                       ></CustomSelectDropdown>
          </CollapsibleSection>
@@ -165,8 +203,9 @@ export default function CreateEvent() {
             <div className='flex-1'>
             <label className="block font-medium mb-2">Start Date & Time</label>
          <Datetime
-                value={startDate}
-                onChange={setStartDate}
+                value={event.startDate}
+                onChange={(date) => eventPropSetter({ startDate: date })}
+    
                 dateFormat="MMMM Do, YYYY"
                 timeFormat="hh:mm A"
                 inputProps={{ placeholder: "Select start date & time" }}
@@ -176,8 +215,8 @@ export default function CreateEvent() {
             <div className='flex-1'>
             <label className="block font-medium mb-2">End Date & Time</label>
             <Datetime
-                 value={endDate}
-                 onChange={setEndDate}
+                 value={event.endDate}
+                 onChange={(date) => eventPropSetter({endDate:date})}
                  dateFormat="MMMM Do, YYYY"
                  timeFormat="hh:mm A"
                  inputProps={{ placeholder: "Select end date & time" }}
@@ -191,10 +230,10 @@ export default function CreateEvent() {
 
          <CollapsibleSection title={'Location'}>
          <CustomSelectDropdown label={'Venue'} name={'location'}
-                      value={selectVenue}
+                      value={event.venue}
                       options={['Hyatt Regency,Kathmandu','Phoenix Chautari,Baglung','Hyperspace,Pokhara']}
                       placeholder='Select a Venue'
-                      onChange={(e) => setSelectedVenue(e.target.value)} required />
+                      onChange={(e) => eventPropSetter({venue:e.target.value})} required />
 
          </CollapsibleSection>
 
@@ -211,7 +250,7 @@ export default function CreateEvent() {
           
           <div className='flex justify-between'>
                 <div><p>Ticket#{index+1}</p></div>
-                <div className='cursor-pointer pr-4' onClick={() => handleDelete(ticket.id) }><Delete size={25} color='gray'/></div>
+                <div className='cursor-pointer pr-4' onClick={() => handleDelete(ticket.id) }><Delete size={25} color='red'/></div>
 
           </div>
           
@@ -223,7 +262,7 @@ export default function CreateEvent() {
       value={ticket.type}
       options={['VIP', 'Early bird', 'Standard', 'Free']}
       placeholder="Select type"
-      onChange={(e) => handleTicketType(ticket.id,e.target.value)}
+      onChange={(e) => handleTicketType(ticket.id,{type:e.target.value})}
       required
     />
   </div>
@@ -233,6 +272,7 @@ export default function CreateEvent() {
     <input
       type="number"
       placeholder="Enter quantity"
+      onBlur={(e) => handleTicketType(ticket.id,{quantity:e.target.value})}
       className="w-full h-10 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
     />
   </div>
@@ -242,6 +282,7 @@ export default function CreateEvent() {
     <input
       type="number"
       placeholder="Rs 0.0"
+      onChange={(e) => handleTicketType(ticket.id,{price:e.target.value})}
       className="w-full h-10 px-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
     />
   </div>
@@ -262,7 +303,7 @@ export default function CreateEvent() {
          <CollapsibleSection title={'Capacity and Pricing'} >
                     <div>
                         <label htmlFor="max-attendees" className="block font-medium">Max Attendees *</label>
-                         <input type="number" id="max-attendees" className="w-full border px-3 py-2 rounded" placeholder="Enter maximum attendees"/>
+                         <input type="number" id="max-attendees" onInput={(e) => eventPropSetter({maxAttendees:e.target.value})} className="w-full border px-3 py-2 rounded" placeholder="Enter maximum attendees"/>
                     </div>
 
          </CollapsibleSection>
@@ -282,66 +323,95 @@ export default function CreateEvent() {
     <h2 className="text-xl font-semibold mb-4">Event Preview</h2>
   </div>
 
-  <div className="bg-white rounded-xl shadow p-4 space-y-4 border-s-2">
-          {/* Event Banner Image */}
-            <div className="rounded overflow-hidden">
-            {images.length > 0 && (
-           <img
-           src={images[0].url}
+  <div className="bg-white rounded-xl text-xs shadow p-4 space-y-4 border-s-2">
+  {/* Event Banner Image with Overlay */}
+  <div className="relative rounded-lg  overflow-hidden h-48">
+    {images.length > 0 && (
+      <>
+        {/* Main Image */}
+        <img
+          src={images[0].url}
           alt={images[0].file.name}
-         className="w-full h-48 object-cover"
-      />
-)}
-          </div>
-
-            {/* Event Title */}
-
-      <div><h3 className="text-lg font-bold">Berserk Fan Meet up</h3></div>
+          className="w-full h-full object-cover"
+        />
+        
+        {/* Dark Overlay */}
+        <div className="absolute inset-0 bg-black/40 flex items-end p-4">
+          {/* Event Title */}
+          <h3 className="text-xl font-bold text-white drop-shadow-lg">
+            {event.title || "Event Title"}
+          </h3>
+        </div>
+      </>
+    )}
+  </div>
 
           {/* Description */}
-      <div className="text-sm text-gray-600 space-y-2">
-         
-          <span>{eventDesc}</span>
-        </div>
+          {event.description && 
+      <div className="text-sm flex gap-1.5 text-gray-600 overflow-clip space-y-2">
+         <div><Text/></div>
+          <div><span >{event.description}</span></div>
+        </div>}
         {/* Event type */}
 
-        <div>
-          <span>Otaku</span>
-        </div>
+        {event.category && 
+        <div className='flex gap-1.5'>
+             <div><Tag size={15} /></div>
+             <div><span>{ event.category }</span></div>
+        </div>}
 
 
         {/* Date and time */}
-
-        <div>
-          Thrusday,April 10, 2025
-        </div>
+          {event.startDate && event.endDate &&
+          <div className='flex gap-1.5'>
+            <div><Calender size={18}/></div>
+            <div>{event.startDate?.format('dddd, MMMM D, YYYY HH:mm')} - {event.endDate?.format('HH:mm')}</div>
+            </div>}
 
         {/* Venue */}
 
-        <div>
-          Phoenix Chautari, USA
-        </div>
+         {event.venue && 
+        <div className='flex gap-1.5'> 
+        <div><Location size={18}/></div>
+          <div>{event.venue}</div>
+        </div>}
 
 
         {/* Tickets */}
 
-        <div cla>
-          <label htmlFor="">Available Tickets</label>
+        <div >
+           <div className='flex gap-1.5 mb-2.5'>
+           <div ><Ticket size={15}/></div>
+           <label htmlFor="">Available Tickets</label>
+
+           </div>
+         
           <div className='flex gap-8'>
-            <div><span>Standard</span></div>
-            <div><span>100 tickets</span></div>
-            <div><span>Rs 250</span></div>
+          {tickets.length > 0 && tickets.map((ticket,index) => (
+            <div key={index} className="flex flex-col gap-4">
+          <div className={getTicketTypeColor(ticket.type.toLowerCase())}><span>{ticket.type}</span></div>
+          <div className=''><span>{ticket.quantity} tickets</span></div>
+          <div><span>Rs {ticket.price}</span></div>
           </div>
+         
+          
+          
+          
+           ))} </div>
         </div>
 
         {/* Max attendees */}
+        {event.maxAttendees > 0 &&
 
-        <div>
-          <span>Max 2500 attendees</span>
-        </div>
+        <div className='flex gap-1.5'>
+           <div><People size={15}/></div>
+          <div><span>Max {event.maxAttendees} attendees</span></div>
+        </div>}
 
         {/* image gallary */}
 
+
+       {images.length >=1 && 
         <div>
           <div><span>Event Gallery ({images.length} images)</span></div>
           <div className="grid grid-cols-4 gap-0">
@@ -360,7 +430,7 @@ export default function CreateEvent() {
 
          
             {/* "+X more" indicator - INSIDE the grid container */}
-    {images.length >= 4 && (
+    {images.length > 4 && (
       <div className="w-20 h-20 rounded bg-gray-100 aspect-square flex items-center justify-center">
         <span className="text-gray-600 font-medium">
           +{images.length - 4}
@@ -370,7 +440,9 @@ export default function CreateEvent() {
       </div>
 
      
-        </div>
+        </div>}
+
+
 
 
 
