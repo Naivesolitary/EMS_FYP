@@ -1,15 +1,45 @@
 const sendResponse = require('../utils/sendResponse');
 const ApiError = require('../utils/ApiError');
+const path = require('path')
 const asyncErrorHandler = require('../utils/asyncErrorHandler')
-const {event,eventById, allEvents,eventUpdate,deleteEventById} = require('../models/eventModel')
+const {event,eventById, allEvents,eventUpdate,deleteEventById,insertImages} = require('../models/eventModel')
 const {createTicket} = require('../models/ticketModel')
 
 //  creates an Event 
 const createEvent = asyncErrorHandler(async (req,res,next) => {
-      eventData = req.body;
-    const newEvent = await event(eventData) ;
-    if(!newEvent) throw new ApiError(500,'Create Event Failed :(')
-    sendResponse(res,{message:'Event Created Successfully!!!',data:newEvent})
+      const eventData = JSON.parse(req.body.event);
+      console.log(eventData)
+      const imageStack = req.files.map(file => ({
+        path:path.join('uploads',file.filename),
+        filename : file.filename}))
+      
+
+    //   const isPrimary = (imageStack.length === 1) ? imageStack.filename: imageStack
+
+    //  const event_id = await event(eventData);
+     const event_id = 2;
+     if(!event_id) throw new ApiError(500,{message:'Failed to create Event'})
+     const {start_datetime:sales_start,end_datetime:sales_end,tickets} = eventData  ; 
+    console.log(sales_start,sales_end);
+    //  const newTicket = await createTicket(sales_start,sales_end,tickets,event_id)
+    //  if (!newTicket)  throw new ApiError(500,{message:'Failed to create Ticket'})
+    const imagesToInsert = imageStack.map((img,index) => ({
+            event_id,
+            path:img.path,
+            isPrimary: index === 0
+
+     }))
+     const imgs = await insertImages(imagesToInsert)   
+    //  console.log(imgs);
+
+
+
+    
+    // Simulate saving event and images to database (replace with real database logic)
+  
+    // const newEvent = await event(eventData) ;
+    // if(!newEvent) throw new ApiError(500,'Create Event Failed :(')
+    sendResponse(res,{message:'Event Created Successfully!!!'})
     
 })
 

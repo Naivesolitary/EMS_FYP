@@ -13,6 +13,7 @@ import { FiTag as Tag } from "react-icons/fi";
 import { CiCalendar as Calender } from "react-icons/ci";
 import { FaRegFileLines as Text } from "react-icons/fa6";
 import { IoMdAdd } from "react-icons/io";
+import axios from 'axios'
 // import { v4 as uuidv4 } from 'uuid'; 
 import uuid from 'uuid4'
 import moment from 'moment';
@@ -26,12 +27,25 @@ export default function CreateEvent() {
     const [tickets,setTicket] = useState([{id:uuid(),type:'Standard',quantity:100,price:100}]);
     console.log(tickets);
     const [event,setEvent] = useState(
-      {title:'',description:'' ,category:'',
-        startDate:moment(),endDate:moment(),venue:'',tickets:tickets ,maxAttendees:''
+      {title:'',description:'' ,category:'', organizer_id: 1, category_id: 2,venue_id:6,
+        start_datetime:moment(),end_datetime:moment(),venue:'',tickets:tickets ,max_attendees:''
 
       });
  
-      console.log(event.startDate)
+      console.log(event.start_datetime)
+      
+     
+      // console.log(images[0]);
+
+      // if (!event.title || !event.start_datetime || tickets.length === 0) {
+      //   alert("Please fill all required fields.");
+      //   return;
+      // }
+
+
+
+   
+    // const [formData, setFormData] = useState({}); 
 
     // Sync tickets with eventDetails
     useEffect(() => {  
@@ -40,6 +54,72 @@ export default function CreateEvent() {
         tickets: tickets
       }));
     }, [tickets]);
+
+
+    function toMySQLDatetime(isoDate) {
+      const date = new Date(isoDate);
+      return date.toISOString().slice(0, 19).replace('T', ' ');
+    }
+
+      
+    const handleSubmit = async(e) => {
+      e.preventDefault();
+      event.start_datetime = toMySQLDatetime(event.start_datetime)
+      event.end_datetime = toMySQLDatetime(event.end_datetime)
+      console.log(event)
+
+
+      const formData = new FormData();
+      formData.append("event",JSON.stringify(event));
+      images?.forEach((imageObj) => {
+         formData.append('images',imageObj.file)
+
+      })
+
+      console.log(formData)
+
+      try{
+
+     const response = await axios.post('http://localhost:3000/api/events',formData,{
+        headers:{
+          'Content-Type':'multipart/form-data'
+        }})
+        console.log('Event created:', response.data);
+        alert('Event created successfully!');
+
+      }catch(error){
+        console.error('Error creating event:', error.response?.data || error.message);
+          alert('Failed to create event.');
+
+      }
+
+
+    
+
+
+
+
+
+
+      
+
+
+
+      
+      // alert('Ahh I see!! you are trying to submit the right')
+
+}
+
+
+
+    const cancelEvent = () => {
+      setEvent({title:'',description:'' ,category:'',
+        start_datetime:moment(),end_datetime:moment(),venue:'',tickets:tickets ,max_attendees:''
+
+      })
+    }
+
+
     
    
     const dragndrop_handler = (e) => {
@@ -123,7 +203,7 @@ export default function CreateEvent() {
     </header>
 
    <div  className="w-full max-w-2xl min-w-[600px]">
-    <form className='shadow-2xl p-6   max-w-2xl w-full overflow-hidden  rounded-lg flex flex-col ' action="">
+    <form className='shadow-2xl p-6   max-w-2xl w-full overflow-hidden  rounded-lg flex flex-col ' onSubmit={handleSubmit}>
         <div className='px-8 py-4 bg-gradient-to-r from-[#2762EB] to-[#a45eed] text-white '>
             <h3 className='font-bold  '>Event Details</h3>
             <p className='text-xs '>create an unforgettable experience</p>
@@ -203,8 +283,8 @@ export default function CreateEvent() {
             <div className='flex-1'>
             <label className="block font-medium mb-2">Start Date & Time</label>
          <Datetime
-                value={event.startDate}
-                onChange={(date) => eventPropSetter({ startDate: date })}
+                value={event.start_datetime}
+                onChange={(date) => eventPropSetter({ start_datetime: date })}
     
                 dateFormat="MMMM Do, YYYY"
                 timeFormat="hh:mm A"
@@ -215,8 +295,8 @@ export default function CreateEvent() {
             <div className='flex-1'>
             <label className="block font-medium mb-2">End Date & Time</label>
             <Datetime
-                 value={event.endDate}
-                 onChange={(date) => eventPropSetter({endDate:date})}
+                 value={event.end_datetime}
+                 onChange={(date) => eventPropSetter({end_datetime:date})}
                  dateFormat="MMMM Do, YYYY"
                  timeFormat="hh:mm A"
                  inputProps={{ placeholder: "Select end date & time" }}
@@ -303,18 +383,20 @@ export default function CreateEvent() {
          <CollapsibleSection title={'Capacity and Pricing'} >
                     <div>
                         <label htmlFor="max-attendees" className="block font-medium">Max Attendees *</label>
-                         <input type="number" id="max-attendees" onInput={(e) => eventPropSetter({maxAttendees:e.target.value})} className="w-full border px-3 py-2 rounded" placeholder="Enter maximum attendees"/>
+                         <input type="number" id="max-attendees" onInput={(e) => eventPropSetter({max_attendees:e.target.value})} className="w-full border px-3 py-2 rounded" placeholder="Enter maximum attendees"/>
                     </div>
 
          </CollapsibleSection>
+         
 
         </div>
-        </div>  
+        </div> 
+        <div className='flex justify-between mt-4'>
+        <button type='reset' onClick={cancelEvent} className=' bg-gray-200 text-black shadow-[0_0_0_2px_rgba(209,213,219,1)] rounded px-4 py-2 cursor-pointer'>Cancel</button>
+        <button type='submit' className='p-3 bg-gradient-to-r from-[#2762EB] to-[#6d22bc] text-white rounded cursor-pointer '>Create Event</button>
+    </div> 
     </form></div>
-    <div className='flex justify-between mt-4'>
-        <button className=' bg-gray-200 text-black shadow-[0_0_0_2px_rgba(209,213,219,1)] rounded px-4 py-2 cursor-pointer'>Cancel</button>
-        <button className='p-3 bg-gradient-to-r from-[#2762EB] to-[#6d22bc] text-white rounded cursor-pointer '>Create Event</button>
-    </div>
+    
     </section>
 </div>
 <div className='sticky top-4 h-fit self-start'>
@@ -362,10 +444,10 @@ export default function CreateEvent() {
 
 
         {/* Date and time */}
-          {event.startDate && event.endDate &&
+          {event.start_datetime && event.end_datetime &&
           <div className='flex gap-1.5'>
             <div><Calender size={18}/></div>
-            <div>{event.startDate?.format('dddd, MMMM D, YYYY HH:mm')} - {event.endDate?.format('HH:mm')}</div>
+            <div>{event.start_datetime?.format('dddd, MMMM D, YYYY HH:mm')} - {event.end_datetime?.format('HH:mm')}</div>
             </div>}
 
         {/* Venue */}
@@ -386,13 +468,20 @@ export default function CreateEvent() {
 
            </div>
          
-          <div className='flex gap-8'>
+
+        
+          <div className='flex flex-col gap-2'>
           {tickets.length > 0 && tickets.map((ticket,index) => (
-            <div key={index} className="flex flex-col gap-4">
-          <div className={getTicketTypeColor(ticket.type.toLowerCase())}><span>{ticket.type}</span></div>
-          <div className=''><span>{ticket.quantity} tickets</span></div>
-          <div><span>Rs {ticket.price}</span></div>
-          </div>
+            ticket.type && (
+            <div key={index} className='flex gap-2'>
+                 
+                 <div className={getTicketTypeColor(ticket.type.toLowerCase())}><span>{ticket.type}</span></div>
+                  <div  ><span>{ticket.quantity} tickets</span></div>
+                  <div><span>Rs {ticket.price}</span></div>
+                
+                
+          
+          </div>)
          
           
           
@@ -401,11 +490,11 @@ export default function CreateEvent() {
         </div>
 
         {/* Max attendees */}
-        {event.maxAttendees > 0 &&
+        {event.max_attendees > 0 &&
 
         <div className='flex gap-1.5'>
            <div><People size={15}/></div>
-          <div><span>Max {event.maxAttendees} attendees</span></div>
+          <div><span>Max {event.max_attendees} attendees</span></div>
         </div>}
 
         {/* image gallary */}

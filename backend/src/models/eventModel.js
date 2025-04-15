@@ -2,13 +2,55 @@ const db = require('../config/db');
 
 
 const event = async(eventData) => {
+ 
  const {organizer_id,title,description,category_id,
-    start_datetime,end_datetime,venue_id,max_attendees,price,status} = eventData;
+    start_datetime,end_datetime,venue_id,max_attendees,tickets} = eventData;
+    const [{price}] = tickets;
+    if (
+      !organizer_id ||
+      !title ||
+      !description ||
+      !category_id ||
+      !start_datetime ||
+      !end_datetime ||
+      !venue_id ||
+      !max_attendees ||
+      !price 
+      
+    ) {
+      return {
+        success: false,
+        status: 400,
+        message: 'Missing required fields'
+      };
+    }
+    // console.log("price : ",price)
     const [result] =  await db.execute(`INSERT INTO events (organizer_id,title,description,category_id,start_datetime,
-        end_datetime,venue_id,max_attendees,price,status) VALUES (?,?,?,?,?,?,?,?,?,?)`,
-        [organizer_id,title,description,category_id,start_datetime,end_datetime,venue_id,max_attendees,price,status])
+        end_datetime,venue_id,max_attendees,price) VALUES (?,?,?,?,?,?,?,?,?)`,
+        [organizer_id,title,description,category_id,start_datetime,end_datetime,venue_id,max_attendees,price])
 
-    return result
+    return result.insertId
+
+
+}
+
+// ----------------- Insert Images ----------------->
+const insertImages = async (imagesToInsert) => {
+   const placeholders = imagesToInsert.map(() => `(?,?,?)`).join(',');
+   const params = imagesToInsert.map((img) => [
+    img.event_id, img.path,img.isPrimary
+
+
+   ]
+       
+
+   )
+
+   const result = await db.execute(`Insert into event_images (event_id, image_url, is_primary) VALUES ${placeholders}`,params.flat())
+   console.log(result)
+   return result
+
+
 
 
 }
@@ -93,5 +135,6 @@ const deleteEventById = async(eventId) =>{
 module.exports = {
     event,allEvents,eventById,
     eventUpdate,deleteEventById,
+    insertImages
    
 }

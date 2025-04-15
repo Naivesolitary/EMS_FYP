@@ -1,8 +1,24 @@
 const db = require('../config/db');
 
 
-const createTicket = async(ticketData) => {
-    const {
+const createTicket = async (sales_start, sales_end, tickets, event_id) => {
+    console.log(sales_start,sales_end)
+    if (!tickets || tickets.length === 0) return [];
+  
+    // Prepare placeholder string: (?, ?, ?, ?, ?, ?, ?), ...
+    const placeholders = tickets.map(() => `(?, ?, ?, ?, ?, ?, ?)`).join(',');
+  
+    // Prepare values array: flatten all ticket data
+    const values = tickets.flatMap(ticket => {
+      const {
+        type: ticket_type,
+        price,
+        quantity: total_quantity
+      } = ticket;
+  
+      const remaining_quantity = total_quantity;
+  
+      return [
         event_id,
         ticket_type,
         price,
@@ -10,20 +26,29 @@ const createTicket = async(ticketData) => {
         remaining_quantity,
         sales_start,
         sales_end
-      } = ticketData;
+      ];
+    });
 
-      
-    
-      const ticket_info = await db.execute(`
+    console.log('Placeholders:', placeholders);
+    console.log('Values:', values);
+
+  
+    const result = await db.execute(
+      `
         INSERT INTO tickets (
           event_id, ticket_type, price, total_quantity, remaining_quantity, sales_start, sales_end
-        ) VALUES (?, ?, ?, ?, ?, ?, ?)
-      `, [event_id, ticket_type, price, total_quantity, remaining_quantity, sales_start, sales_end]);
+        ) VALUES ${placeholders}`,values)
+        console.log(result) 
+        return result[0]   
+        
 
-      return ticket_info[0].insertId
-    
-
-}
+   
+    // console.log(result,values)  
+    // await db.execute(result, values);  
+  
+    // return result; // first inserted ID (bulk insert only gives this)
+  };
+  
 
 /// checked 
 const getTicketById = async(conn,ticket_id) => {
