@@ -8,7 +8,7 @@ export default function Layout({children}) {
     
      <div className="min-h-screen flex flex-col">
       <NavMenu/>
-      <main className="flex-grow">
+      <main className="flex-grow pt-16">
       <Outlet/>
       </main>
       <Footer/>
