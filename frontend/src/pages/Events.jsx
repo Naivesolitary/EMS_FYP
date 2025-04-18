@@ -2,7 +2,8 @@ import Dragonsky from '../images/Dragon Sky.jpg';
 import Twilight from '../images/Twilight.png';
 import Moon from '../images/Moon.png';
 import Cloud from '../images/Cloud.png';
-import axios from  'axios'
+import axios from  'axios';
+import {BASE_URL} from '../config'
 import { useState, useEffect } from 'react';
 import { FaCalendarAlt, FaMapMarkerAlt, FaSearch, FaArrowLeft, FaArrowRight } from 'react-icons/fa';;
 import { EventModal } from '../components/EventModal'; // Add this import
@@ -70,7 +71,8 @@ export default function Events() {
     return {
       name: event.title,
       description: event.description,
-      images: [{ src: Dragonsky, alt: event.title },{ src: Twilight, alt: event.title },{ src: Moon, alt: event.title },{ src: Cloud, alt: event.title }],
+      // images: [{ src: Dragonsky, alt: event.title },{ src: Twilight, alt: event.title },{ src: Moon, alt: event.title },{ src: Cloud, alt: event.title }],
+      images: event.images,
       startDate: event.start_datetime,
       endDate: event.end_datetime, // Adding 2 hours as example end time
       location: {
@@ -153,12 +155,14 @@ export default function Events() {
                         animationDelay: `${parseInt(event.id) * 100}ms`,
                       }}
                     >
-                      <div className="relative h-48 w-full">
-                        <img
-                          src={ Dragonsky || '/placeholder.svg'}
-                          alt={event.title}
-                          className="object-cover w-full h-full"
-                        />
+                    <div className="relative h-48 w-full">
+                        {event.images.length > 0 && (
+                                <img
+                              src={`${BASE_URL}${event.images[0].image_url}`|| '/placeholder.svg'}
+                              alt={event.title}
+                            className="object-cover w-full h-full"
+                          />
+                          )}
                       </div>
 
                       <div className="p-6">

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
+import { BASE_URL } from "../config";
 import { 
   FaArrowLeft, 
   FaArrowRight, 
@@ -15,6 +16,7 @@ import {
 export function EventModal({ isOpen, onClose, event }) {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [mounted, setMounted] = useState(false);
+  
 
   useEffect(() => {
     setMounted(true);
@@ -99,9 +101,9 @@ export function EventModal({ isOpen, onClose, event }) {
                     }`}
                   >
                     <img 
-                      src={image.src || "/placeholder.svg"} 
+                      src={`${BASE_URL}${image.image_url}`} 
                       alt={image.alt} 
-                      className="h-full w-full object-cover" 
+                      className="h-full w-full object-contain" 
                     />
                   </div>
                 ))}
@@ -139,8 +141,8 @@ export function EventModal({ isOpen, onClose, event }) {
             </>
           ) : (
             <img
-              src={event.images[0]?.src || "/placeholder.svg?height=400&width=800"}
-              alt={event.images[0]?.alt || event.name}
+              src={`${BASE_URL}${event.images[0].image_url}`} 
+              alt={event.images[0].alt || event.name}
               className="h-full w-full object-cover rounded-lg"
             />
           )}
