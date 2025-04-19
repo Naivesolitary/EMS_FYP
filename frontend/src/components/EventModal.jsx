@@ -16,6 +16,7 @@ import {
 export function EventModal({ isOpen, onClose, event }) {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [mounted, setMounted] = useState(false);
+  console.log('event obj from event modal: ',event)
   
 
   useEffect(() => {
@@ -59,9 +60,9 @@ export function EventModal({ isOpen, onClose, event }) {
   };
 
   const formatPrice = (price) => {
-    return new Intl.NumberFormat("en-US", {
+    return new Intl.NumberFormat("ne-NP", {
       style: "currency",
-      currency: "USD",
+      currency: "NPR",
     }).format(price);
   };
 
@@ -181,56 +182,56 @@ export function EventModal({ isOpen, onClose, event }) {
             </div>
 
             <div className="space-y-4">
+            <div></div>
               <div>
-                <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider">Ticket Type</h3>
-                <p className="mt-2 flex items-center gap-2 text-gray-700">
+                <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider">Tickets</h3>
+                {event.tickets.map((ticket,index) => (
+                  <div>
+                  <p key={index} className="mt-2 flex items-center gap-2 text-gray-700">
                   <FaTicketAlt className="h-4 w-4 text-gray-500" />
-                  {event.ticketType}
+                  {ticket.type}
+                  <p> {formatPrice(ticket.price)} </p>
                 </p>
+                </div>
+                
+                ))}
+               
               </div>
 
-              <div>
-                <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider">Availability</h3>
-                <p className="mt-2 text-gray-700">
-                  {event.ticketsAvailable > 0 ? (
-                    <span>{event.ticketsAvailable} tickets remaining</span>
-                  ) : (
-                    <span className="font-medium text-red-500">Sold Out</span>
-                  )}
-                </p>
-              </div>
+            
             </div>
           </div>
 
-          {/* Price and CTA section */}
-          <div className="mt-8 flex flex-wrap items-center justify-between gap-4 p-4 md:p-6 bg-gray-50 rounded-lg">
-            <div className="space-y-2">
-              <div className="flex items-baseline gap-3">
-                <span className="text-2xl md:text-3xl font-bold text-gray-900">{formatPrice(event.price)}</span>
-                {event.discounted && event.originalPrice && (
-                  <span className="text-sm text-gray-500 line-through">
-                    {formatPrice(event.originalPrice)}
-                  </span>
-                )}
-              </div>
-              {event.discounted && (
-                <span className="inline-block rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800">
-                  Special Offer
-                </span>
-              )}
-            </div>
+          <div>
+  {event.tickets.map((ticket, index) => (
+    <div key={ticket.id} className="border rounded-md p-3 bg-gray-50">
+      <div className="flex justify-between items-center">
+        <div className="text-gray-800 font-semibold">{ticket.type}</div>
+        <div className="text-gray-700">
+          {ticket.available > 0 ? `${ticket.available} tickets left` : 'Sold Out'}
+        </div>
+      </div>
+      <div className="flex items-baseline gap-2 mt-1">
+        <span className="text-lg font-bold text-teal-600">
+          {formatPrice(ticket.price)}
+        </span>
+      </div>
 
-            <button
-              disabled={event.ticketsAvailable === 0}
-              className={`px-6 py-3 md:px-8 md:py-3 rounded-lg font-medium text-base md:text-lg transition-all ${
-                event.ticketsAvailable > 0 
-                  ? "bg-teal-600 hover:bg-teal-700 text-white shadow-md hover:shadow-lg" 
-                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
-              }`}
-            >
-              {event.ticketsAvailable > 0 ? "Book Now" : "Sold Out"}
-            </button>
-          </div>
+      {/* Conditionally render button based on availability */}
+      <button
+        disabled={ticket.available === 0}
+        className={`mt-3 px-6 py-3 rounded-lg font-medium text-base transition-all ${
+          ticket.available > 0
+            ? "bg-teal-600 hover:bg-teal-700 text-white shadow-md hover:shadow-lg"
+            : "bg-gray-300 text-gray-500 cursor-not-allowed"
+        }`}
+      >
+        {ticket.available > 0 ? "Book Now" : "Sold Out"}
+      </button>
+    </div>
+  ))}
+</div>
+          
 
           <div className="my-6 md:my-8 h-px w-full bg-gray-200"></div>
 
