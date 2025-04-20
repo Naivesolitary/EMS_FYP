@@ -9,7 +9,10 @@ const eventRoutes = require('./routes/eventRoutes')
 const errorHandler = require('../src/middlewares/errorHandler')
 
 
-app.use(cors())
+// app.use(cors())
+app.use(cors({
+    origin: 'http://localhost:5173'
+  }));
 dotev.config();
 app.use('/uploads', express.static(path.join(__dirname,'uploads')))
 app.use(express.json()) // To parse JSON bodies
