@@ -1,7 +1,7 @@
 const asyncErrorHandler = require('../utils/asyncErrorHandler');
 const sendResponse = require('../utils/sendResponse');
 const ApiError = require('../utils/ApiError')
-const {getRemainingTickets,getTicketById} = require('../models/ticketModel')
+const {getRemainingTickets,getTicketById,getTicketInfo} = require('../models/ticketModel')
 
 const ticket = asyncErrorHandler(async(req,res,next) => {
     const event_id = req.params.id;
@@ -20,14 +20,17 @@ const ticketById = asyncErrorHandler(async(req,res,next) => {
 }) 
 
 const checkTicket = asyncErrorHandler(async(req,res,next) => {
-    const event_id = req.params.id
-    const booking_data =req.body // booking data
-    const tickets = await getTicketWithId(event_id) 
+    const event_id = req.params.eventid
+    console.log(event_id)
+    // const booking_data =req.body // booking data
+    const [tickets] = await getTicketInfo(event_id)
+    console.log(tickets) 
    
    
-    sendResponse(res,{data:ticketIdAndQty,message:'ticket info fetched successfully!'})
+    sendResponse(res,{data:tickets,message:'ticket info fetched successfully!'})
 
 })
+
 
 
 

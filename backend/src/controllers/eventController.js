@@ -2,27 +2,27 @@ const sendResponse = require('../utils/sendResponse');
 const ApiError = require('../utils/ApiError');
 const path = require('path')
 const asyncErrorHandler = require('../utils/asyncErrorHandler')
-const {event,eventById, allEvents,eventUpdate,deleteEventById,insertImages} = require('../models/eventModel')
-const {createTicket} = require('../models/ticketModel')
+const {event,eventById, allEvents,eventUpdate,deleteEventById,insertImages,getImages} = require('../models/eventModel')
+const {createTicket,getTicketInfo} = require('../models/ticketModel')
 
 //  creates an Event 
 const createEvent = asyncErrorHandler(async (req,res,next) => {
       const eventData = JSON.parse(req.body.event);
       console.log(eventData)
       const imageStack = req.files.map(file => ({
-        path:path.join('uploads',file.filename),
+        path:path.posix.join('uploads',file.filename),  //POSIX always uses forward slashes
         filename : file.filename}))
       
 
     //   const isPrimary = (imageStack.length === 1) ? imageStack.filename: imageStack
 
-    //  const event_id = await event(eventData);
-     const event_id = 2;
+     const event_id = await event(eventData);
+    //  const event_id = 2;
      if(!event_id) throw new ApiError(500,{message:'Failed to create Event'})
      const {start_datetime:sales_start,end_datetime:sales_end,tickets} = eventData  ; 
     console.log(sales_start,sales_end);
-    //  const newTicket = await createTicket(sales_start,sales_end,tickets,event_id)
-    //  if (!newTicket)  throw new ApiError(500,{message:'Failed to create Ticket'})
+     const newTicket = await createTicket(sales_start,sales_end,tickets,event_id)
+     if (!newTicket)  throw new ApiError(500,{message:'Failed to create Ticket'})
     const imagesToInsert = imageStack.map((img,index) => ({
             event_id,
             path:img.path,
@@ -47,11 +47,28 @@ const createEvent = asyncErrorHandler(async (req,res,next) => {
 
 //  get all the events
 const getEvents = asyncErrorHandler(async(req,res,next) => {
-    const events = await allEvents();
-    if(!events) throw new ApiError(404,'Events not found')
+    const eventData = await allEvents();
+    if(!eventData) throw new ApiError(404,'Events not found')
+   
+
+    const events = await Promise.all(eventData.map(async(event)=> {
+        const images = await getImages(event.event_id); 
+         return {
+            ...event,
+            images: images || []
+         }
+
+    }))    
+
     sendResponse(res,{data:events,message:'fetched all the events'})    
 
+})
 
+
+const images = asyncErrorHandler(async(req,res,next) => {
+    const event_id = req.params.eventid;
+    const images = await getImages(event_id)
+    sendResponse(res,{data:images,message:'Images fetched successfully'})
 })
 
 
@@ -120,6 +137,7 @@ module.exports = {
     getEventByid,
     updateEvent,
     deleteEvent,
-    ticket
+    ticket,
+    images
 
 }

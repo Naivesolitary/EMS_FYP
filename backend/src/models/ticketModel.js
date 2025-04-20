@@ -61,6 +61,18 @@ const getTicketById = async(conn,ticket_id) => {
 }
 
 
+const getTicketInfo = async(event_id) => {
+
+  const res = await db.execute(`
+    SELECT * FROM tickets WHERE event_id = ?`,[event_id]);
+    console.log(res)
+
+    return res
+  // console.log(res)  
+
+}
+
+
 
 const getSelectedTicket = async(ids) => {
   const [tickets] = await db.execute(` SELECT ticket_id, price, remaining_quantity FROM tickets WHERE ticket_id IN (${ids})`)
@@ -80,5 +92,5 @@ const getSelectedTicket = async(ids) => {
 
 
 module.exports = {
-    createTicket,getTicketById,getSelectedTicket
+    createTicket,getTicketById,getSelectedTicket,getTicketInfo
 }
