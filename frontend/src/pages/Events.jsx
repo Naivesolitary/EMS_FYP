@@ -2,11 +2,17 @@ import Dragonsky from '../images/Dragon Sky.jpg';
 import Twilight from '../images/Twilight.png';
 import Moon from '../images/Moon.png';
 import Cloud from '../images/Cloud.png';
+import ClipLoader from 'react-spinners/ClipLoader';
 import axios from  'axios';
 import {BASE_URL} from '../config'
 import { useState, useEffect } from 'react';
-import { FaCalendarAlt, FaMapMarkerAlt, FaSearch, FaArrowLeft, FaArrowRight } from 'react-icons/fa';;
+import { FaCalendarAlt, FaMapMarkerAlt, FaSearch, FaArrowLeft, FaArrowRight, FaDAndDBeyond, FaGlideG } from 'react-icons/fa';;
 import { EventModal } from '../components/EventModal'; // Add this import
+import Booking from './Booking'
+
+// *  NOTES : here selectedRaWEvent state variable tracks the event info without tickets info i.e tickets : [] or before tickects are fetch;
+
+//  
 
 export default function Events() {
   const [events, setEvents] = useState([]);
@@ -14,9 +20,18 @@ export default function Events() {
   const [isLoading, setIsLoading] = useState(true);
   const [currentLot, setCurrentLot] = useState(0);
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [selectedRawEvent, setSelectedRawEvent] = useState(null);
+  const [tickets,setTickets] = useState([]);
+  const [isLoadingTickets, setIsLoadingTickets] = useState(true);
+  const [modalType, setModalType] = useState(null); // 'view' or 'book'
+
+ 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const eventsPerLot = 5;
 
+
+
+  // ------------------ FETCH EVENT DETAILS ---------------------------/
   useEffect(() => {
     const loadEvents = async () => {
       setIsLoading(true);
@@ -35,6 +50,87 @@ export default function Events() {
   
     loadEvents();
   }, []);
+
+
+
+  // ------------
+  useEffect(() => {
+    let isMounted = true;
+
+    if(isModalOpen && selectedRawEvent){
+    const fetchData = async() => {
+      try{
+              setIsLoadingTickets(true);
+             const {data:response} = await axios.get(`${BASE_URL}api/events/${selectedRawEvent.event_id}/ticket`) // array of ticket objects // by defaul axios return promise with data key
+             const transform = transformEventForModal(selectedRawEvent,response.data,false)
+             setSelectedEvent(transform)
+
+            //  console.log(`response: `,response)
+            //  console.log('event:',selectedEvent)
+            if(isMounted){
+              setTickets(response.data)
+              setIsLoadingTickets(false)
+            }
+             console.log(selectedRawEvent.event_id)
+             console.log(response.data)
+            //  setTickets(response.data)
+            
+            //  setTickets(response.data.data)
+            //  console.log(tickets)
+
+            }catch(error){
+              console.error('Error while fetching ticket info: ',error)
+            } finally {
+              if(isMounted){setIsLoadingTickets(false);} // End loading state`}
+              
+            }
+    }
+
+      fetchData()
+}
+ 
+return () => {
+  isMounted = false;
+}
+
+
+
+
+},[isModalOpen,selectedRawEvent])
+
+
+  // ------------------------- HANDLE BOOKING
+
+  const handleBooking = async (bookingData) => {
+    const { fullName, phoneNumber, tickets, totalAmount } = bookingData;
+  
+    try {
+      // Assuming you have a logged-in user session or user context
+      const userId = 123; // Get this from the logged-in user (e.g., from context or localStorage)
+      
+      // Send booking data to the backend
+      const response = await axios.post('/api/bookings', {
+        user_id: userId, 
+        event_id: selectedEvent.event_id,
+        full_name: fullName,
+        phone_number: phoneNumber,
+        tickets: tickets,
+        total_amount: totalAmount,
+      });
+  
+      if (response.data.success) {
+        alert('Booking confirmed!');
+        onClose(); // Close the modal after successful booking
+      } else {
+        alert('Booking failed. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error while making the booking:', error);
+      alert('Error while processing your booking. Please try again later.');
+    }
+  };
+  
+
   
 
 
@@ -66,9 +162,14 @@ export default function Events() {
   };
 
   // Function to transform your event data to match modal expectations
-  const transformEventForModal = (event) => {
-    console.log("From TransformEventForModal:", typeof event.end_datetime)
+  
+  const transformEventForModal = (event,tickets, isLoadingTickets) => {
+
+ 
+
+   
     return {
+      event_id : event.event_id,
       name: event.title,
       description: event.description,
       // images: [{ src: Dragonsky, alt: event.title },{ src: Twilight, alt: event.title },{ src: Moon, alt: event.title },{ src: Cloud, alt: event.title }],
@@ -79,9 +180,8 @@ export default function Events() {
         address: event.venue_location,
         mapUrl: `https://maps.google.com/?q=${encodeURIComponent(event.venue_location)}`
       },
-      ticketType: event.price === 0 ? 'Free' : 'General Admission',
-      ticketsAvailable: 100, // Static value since your sample doesn't have this
-      price: event.price,
+      tickets,
+      isLoadingTickets,
       reviews: [
         {
           id: 1,
@@ -156,7 +256,7 @@ export default function Events() {
                       }}
                     >
                     <div className="relative h-48 w-full">
-                        {event.images.length > 0 && (
+                        {event.images?.length > 0 && (
                                 <img
                               src={`${BASE_URL}${event.images[0].image_url}`|| '/placeholder.svg'}
                               alt={event.title}
@@ -179,23 +279,35 @@ export default function Events() {
                           <span className="text-sm">{event.venue_location}</span>
                         </div>
 
-                        <div className="flex items-center gap-2 text-gray-500 mb-6">
-                          <span className="text-sm font-medium">
-                            {event.priceFrom === 0 ? 'Free Entry' : `From Rs ${parseInt(event.price).toFixed(2)}`}
-                          </span>
-                        </div>
+                      
+                        
+                         
 
                         <div className="flex gap-3">
                           <button 
                             onClick={() => {
-                              setSelectedEvent(transformEventForModal(event));
+                              setTickets([]);
+                              setIsLoadingTickets(true);
+                              setModalType('view')
+                              setSelectedRawEvent(event)
+                              // setSelectedEvent(transformEventForModal(event));
                               setIsModalOpen(true);
                             }}
                             className="flex-1 py-2 px-4 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium rounded-full transition-all"
                           >
                             View
                           </button>
-                          <button className="flex-1 py-2 px-4 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-full hover:translate-y-[-2px] transition-all">
+                          <button className="flex-1 py-2 px-4 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-full hover:translate-y-[-2px] transition-all"
+                           onClick={() => {
+                               setTickets([]);
+                              setIsLoadingTickets(true);
+                              setModalType('book')
+                              setSelectedRawEvent(event)
+                            // setSelectedEvent(transformEventForModal(event))
+                            setIsModalOpen(true)
+                            
+                            }}
+                          >
                             Book
                           </button>
                         </div>
@@ -220,11 +332,20 @@ export default function Events() {
       </div>
 
       {/* Event Modal */}
-      {isModalOpen && selectedEvent && (
+      {isModalOpen && selectedEvent && modalType === 'view' && (
         <EventModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           event={selectedEvent}
+        />
+      )}
+
+      {isModalOpen && selectedEvent && modalType === 'book' && (
+        <Booking
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          event={selectedEvent}
+          onSubmit={handleBooking}
         />
       )}
     </div>

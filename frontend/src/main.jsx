@@ -15,6 +15,7 @@ import Error from './components/Error.jsx'
 
 
 
+
 const router = createBrowserRouter([
   {
     path:'/',
@@ -47,6 +48,7 @@ const router = createBrowserRouter([
         path: 'create-event',
         element: <CreateEvent/>
       },
+    
       {
         path: '*',
         element: <Error />
