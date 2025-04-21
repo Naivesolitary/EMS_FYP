@@ -3,7 +3,7 @@ const router = express.Router();
 const {createEvent,getEvents,deleteEvent, getEventByid, updateEvent,ticket,images} = require('../controllers/eventController')
 const {getImages} = require('../models/eventModel')
 const {checkTicket,ticketById,} = require('../controllers/ticketController')
-const {bookEventTicket} = require('../controllers/bookingController')
+const {bookEventTicket,newBooking} = require('../controllers/bookingController')
 const upload = require('../middlewares/uploadMiddleware')
 
 
@@ -16,7 +16,8 @@ router.delete('/',deleteEvent)
 router.route('/:id').get(getEventByid).patch(updateEvent).delete(deleteEvent);
 router.route('/:id/tickets').get(ticketById).post(ticket);
 router.route('/:eventid/ticket').get(checkTicket)
-router.route('/:eventId/bookings').post(bookEventTicket)
+// router.route('/:eventId/bookings').post(bookEventTicket)
+router.route('/:eventId/bookings').post(newBooking)
 // router.post('/:id/booking')
 
 

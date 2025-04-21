@@ -2,10 +2,10 @@ const db = require('../config/db')
 
 
    // You must pass a MySQL dbection object to use transactions
-const createBooking = async (conn, userId, eventId) => {
+const createBooking = async (conn, userId, eventId,fullName,phoneNumber) => {
   const [result] = await conn.execute(
-    `INSERT INTO bookings (user_id, event_id, total_amount) VALUES (?, ?, ?)`,
-    [userId, eventId, 0.00]
+    `INSERT INTO bookings (user_id, event_id, total_amount,name_at_booking,phone_at_booking) VALUES (?, ?, ?,?,?)`,
+    [userId, eventId, 0.00,fullName,phoneNumber]
   );
   return result.insertId;
 };

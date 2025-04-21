@@ -6,59 +6,63 @@ const db = require('../config/db');
 const { response } = require('express');
 const sendResponse = require('../utils/sendResponse');
   
+
+
+
+
+    // FINAL:  TESTED  SUCCESSFULLY   Create New Booking  # PAYMENT ID TO BE INSERTED
+    const newBooking = async (req, res) => {
+      let conn;
+      try{
+      const user_id = 2;
+      const event_id = req.params.eventId;
+      const {full_name,phone_number, tickets, total_amount} = req.body;
+     
   
+       conn = await db.getConnection();
+  
+      await conn.beginTransaction();
+  
+      const bookingId = await createBooking(conn,user_id,event_id,full_name,phone_number);
+       console.log(`1st query: ${conn}`,bookingId)
+      // let total_amount = 0;
+      for(const item of tickets){
+         const {ticket_id, quantity,price} = item
+         const ticket = await getTicketById(conn,ticket_id);
+         console.log(`2nd Query: ${conn}`,ticket)
+         if (!ticket) {
+          throw new ApiError(404,`Ticket ID ${ticket_id} not found`);
+        }
+  
+        if(ticket.remaining_quantity < quantity ){
+           throw new ApiError(401,`Not enough tickets for Ticket ID ${ticket_id}. Requested: ${quantity}, Available: ${ticket.remaining_quantity}`)
+  
+        }
+    
+        const isBookingItemInserted = await insertBookingItem(conn, bookingId, ticket_id, quantity, price);
+        console.log('new Book item Inserted',isBookingItemInserted)
+        console.log("Reducing quantity", { ticket_id, quantity });
 
-  // TESTED Successfully
-  const bookEventTicket = async (req, res) => {
-    let conn;
-    try{
-    const user_id = 2;
-    const event_id = req.params.eventId;
-    const {selected_tickets} = req.body;
-   
-
-     conn = await db.getConnection();
-
-    await conn.beginTransaction();
-
-    const bookingId = await createBooking(conn,user_id,event_id);
-     console.log(`1st query: ${conn}`,bookingId)
-    let total_amount = 0;
-    for(const item of selected_tickets){
-       const {ticket_id, quantity} = item
-       const ticket = await getTicketById(conn,ticket_id);
-       console.log(`2nd Query: ${conn}`,ticket)
-       if (!ticket) {
-        throw new ApiError(404,`Ticket ID ${ticket_id} not found`);
+        const isQntyReduced = await reduceTicketQuantity(conn, ticket_id, quantity);
+        console.log('Quantity Reduced: ',isQntyReduced)
+        await updateBookingTotal(conn, bookingId, total_amount);
+    
+      }
+      sendResponse(res,{message: 'Booking successful', data:{bookingId,total_amount}})
+      await conn.commit();
+      conn.release();
+    } catch(error){
+      await conn.rollback();
+      conn.release();
+  
+      sendResponse(res,{statusCode:500, message:'Booking failed', data: error.message})
+     
+  
+      }
+  
+  
       }
 
-      if(ticket.remaining_quantity < quantity ){
-         throw new ApiError(401,`Not enough tickets for Ticket ID ${ticket_id}. Requested: ${quantity}, Available: ${ticket.remaining_quantity}`)
-
-      }
-      const cost = ticket.price * quantity
-      total_amount += cost
-      const isBookingItemInserted = await insertBookingItem(conn, bookingId, ticket_id, quantity, ticket.price);
-      console.log('new Book item Inserted',isBookingItemInserted)
-      const isQntyReduced = await reduceTicketQuantity(conn, ticket_id, quantity);
-      console.log('Quantity Reduced: ',isQntyReduced)
-      await updateBookingTotal(conn, bookingId, total_amount);
-  
-    }
-    sendResponse(res,{message: 'Booking successful', data:{bookingId,total_amount}})
-    await conn.commit();
-    conn.release();
-  } catch(error){
-    await conn.rollback();
-    conn.release();
-
-    sendResponse(res,{statusCode:500, message:'Booking failed', data: error.message})
-   
-
-    }
-
-
-    }
 
 
   
@@ -99,10 +103,11 @@ const sendResponse = require('../utils/sendResponse');
   };
   
   module.exports = {
-    bookEventTicket,
+  
     getBookings,
     getBookingDetails,
     cancelBooking,
+    newBooking
     
   };
   

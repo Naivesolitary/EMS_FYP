@@ -102,29 +102,50 @@ return () => {
   // ------------------------- HANDLE BOOKING
 
   const handleBooking = async (bookingData) => {
-    const { fullName, phoneNumber, tickets, totalAmount } = bookingData;
+    const { fullName, phoneNumber, selectedTickets, allTickets, totalAmount } = bookingData;
+    console.log("booking Data", allTickets)
   
     try {
       // Assuming you have a logged-in user session or user context
-      const userId = 123; // Get this from the logged-in user (e.g., from context or localStorage)
+      // const userId = 123; // Get this from the logged-in user (e.g., from context or localStorage)
+
+      console.log('All Tickets: ' , allTickets)
+      const formattedData = Object.entries(selectedTickets).map(([ticketStrId,quantity]) => {
+        const fullTicket = allTickets.find(ticket => ticket.ticket_id === Number(ticketStrId))
+        console.log("Full ticket:", fullTicket)
+        
+        return {
+          ticket_id : Number(ticketStrId),
+          quantity,
+          price: fullTicket?.price || 0,
+          
+        }
+      })
+      console.log("formatted Data: ",formattedData)
+
+
+   
+      
       
       // Send booking data to the backend
-      const response = await axios.post('/api/bookings', {
-        user_id: userId, 
-        event_id: selectedEvent.event_id,
+      const response = await axios.post(`/api/events/${selectedEvent.event_id}/bookings`, {
+        // user_id: userId, 
+        // event_id: selectedEvent.event_id,
         full_name: fullName,
         phone_number: phoneNumber,
-        tickets: tickets,
+        tickets: formattedData,
         total_amount: totalAmount,
       });
   
       if (response.data.success) {
         alert('Booking confirmed!');
-        onClose(); // Close the modal after successful booking
+        // onClose(); // Close the modal after successful booking
       } else {
         alert('Booking failed. Please try again.');
-      }
-    } catch (error) {
+    }
+    }
+      
+    catch (error) {
       console.error('Error while making the booking:', error);
       alert('Error while processing your booking. Please try again later.');
     }

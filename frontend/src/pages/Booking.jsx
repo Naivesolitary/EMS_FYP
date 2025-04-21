@@ -9,7 +9,7 @@ export default function  Booking({ isOpen, onClose, event, onSubmit }) {
   const [fullName,setFullName] = useState("")
   const [phoneNumber, setPhoneNumber] = useState("")
   const [selectedTickets, setSelectedTickets] = useState({})
-  const [isSubmitting, setIsSubmitting] = useState(event.tickets)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [errors, setErrors] = useState({})
   const modalRef = useRef(null)
 
@@ -123,7 +123,7 @@ export default function  Booking({ isOpen, onClose, event, onSubmit }) {
       newErrors.phoneNumber = "Please enter a valid phone number"
     }
 
-    const hasTickets = Object.values(tickets).some((qty) => qty > 0)
+    const hasTickets = Object.values(selectedTickets).some((qty) => qty > 0)
     if (!hasTickets) {
       newErrors.tickets = "Please select at least one ticket"
     }
@@ -134,14 +134,16 @@ export default function  Booking({ isOpen, onClose, event, onSubmit }) {
 
   const handleSubmit = async () => {
     if (!validateForm()) return
+    console.log('valid form.....')
 
     setIsSubmitting(true)
     try {
       await onSubmit({
         fullName,
         phoneNumber,
-        tickets,
-        totalAmount,
+        selectedTickets,
+        allTickets : tickets,
+        totalAmount
       })
     } catch (error) {
       console.error("Error submitting booking:", error)
@@ -327,7 +329,7 @@ export default function  Booking({ isOpen, onClose, event, onSubmit }) {
               )}
               <div className="flex justify-between font-medium pt-3 mt-2 border-t border-gray-200">
                 <span className="text-gray-800">Total</span>
-                <span className="text-xl font-bold text-purple-700">${totalAmount.toFixed(2)}</span>
+                <span className="text-xl font-bold text-purple-700">{formatPrice(totalAmount.toFixed(2))}</span>
               </div>
             </div>
 
