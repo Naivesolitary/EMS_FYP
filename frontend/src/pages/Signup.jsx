@@ -1,8 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { FiEye, FiEyeOff, FiUser, FiMail, FiLock, FiPhone, FiUserCheck } from "react-icons/fi"
 import { Link } from "react-router-dom"
+import axios from "axios"
+const BASE_URL = import.meta.env.VITE_BACKEND_URL
+
 
 const Signup = ({ onSwitchToLogin }) => {
   const [showPassword, setShowPassword] = useState(false)
@@ -14,6 +17,8 @@ const Signup = ({ onSwitchToLogin }) => {
     phone: "",
     role: "attendee",
   })
+
+  console.log(signupForm)
 
   const validateEmail = (email) => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -43,6 +48,8 @@ const Signup = ({ onSwitchToLogin }) => {
       // Add your signup logic here
     }
   }
+
+   const signUpRes = axios.post(`${BASE_URL}/api/auth/signup`,signupForm)
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">

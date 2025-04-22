@@ -12,6 +12,8 @@ import Home from './pages/Home.jsx'
 import Events from './pages/Events.jsx'
 import CreateEvent from './pages/CreateEvent.jsx'
 import Error from './components/Error.jsx'
+import PaymentFailed from './pages/PaymentFailed.jsx'
+import PaymentSuccess from './pages/PaymentSuccess.jsx'
 
 
 
@@ -52,7 +54,17 @@ const router = createBrowserRouter([
       {
         path: '*',
         element: <Error />
+      },
+      {
+        path:'payment-success',
+        element:<PaymentSuccess/>
+      },
+      {
+        path:'payment-failed',
+        element:<PaymentFailed/>
       }
+
+      
     
     ]
     

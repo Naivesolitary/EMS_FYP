@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import { FiX, FiLoader, FiMinus, FiPlus, FiCalendar, FiMapPin, FiCreditCard, FiCheckCircle } from "react-icons/fi"
+import Payment from "./Payment";
 
 export default function  Booking({ isOpen, onClose, event, onSubmit }) {
   const {event_id, tickets} = event;
@@ -9,6 +10,7 @@ export default function  Booking({ isOpen, onClose, event, onSubmit }) {
   const [fullName,setFullName] = useState("")
   const [phoneNumber, setPhoneNumber] = useState("")
   const [selectedTickets, setSelectedTickets] = useState({})
+  const [paymentFormData,setPaymentFormData] = useState();
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errors, setErrors] = useState({})
   const modalRef = useRef(null)
@@ -60,6 +62,18 @@ export default function  Booking({ isOpen, onClose, event, onSubmit }) {
     }
   }
 
+
+  // const makePayment = () => {
+
+  //   setPayment({
+  //     fullName,
+  //     phoneNumber,
+  //     selectedTickets,
+  //     allTickets : tickets,
+  //     totalAmount
+  //   })
+
+  
   // Handle escape key to close modal
   useEffect(() => {
     function handleEscapeKey(event) {
@@ -138,13 +152,18 @@ export default function  Booking({ isOpen, onClose, event, onSubmit }) {
 
     setIsSubmitting(true)
     try {
-      await onSubmit({
+      const result = await onSubmit({
         fullName,
         phoneNumber,
         selectedTickets,
         allTickets : tickets,
         totalAmount
       })
+      console.log('Result checking in Booking: ', result)
+      if (result?.success){
+        setPaymentFormData(result.paymentData)
+
+      }
     } catch (error) {
       console.error("Error submitting booking:", error)
     } finally {
@@ -153,6 +172,9 @@ export default function  Booking({ isOpen, onClose, event, onSubmit }) {
   }
 
   if (!isOpen) return null
+
+ 
+
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
@@ -381,6 +403,9 @@ export default function  Booking({ isOpen, onClose, event, onSubmit }) {
             Cancel
           </button>
         </div>
+        {console.log('Payment  data  from: ',paymentFormData)}
+
+        {paymentFormData && <Payment paymentData={paymentFormData} />}
       </div>
     </div>
   )

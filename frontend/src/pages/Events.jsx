@@ -137,9 +137,16 @@ return () => {
         total_amount: totalAmount,
       });
   
+      const {paymentData} = response.data.data
+      console.log("Response data check in Event.jsx: " ,response.data.data)
       if (response.data.success) {
-        alert('Booking confirmed!');
-        // onClose(); // Close the modal after successful booking
+        return {
+          success :true,
+          paymentData
+          // booking_id : response.data.bookingId
+        }
+    //     alert('Booking confirmed!');
+    //     // onClose(); // Close the modal after successful booking
       } else {
         alert('Booking failed. Please try again.');
     }
