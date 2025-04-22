@@ -32,10 +32,30 @@ const reduceTicketQuantity = async(conn, ticket_id, quantity) =>{
   
   };
 
+
+  const updateBookingStatus = async(status,booking_id) => {
+    await db.execute(`UPDATE bookings SET status = ? WHERE booking_id = ?`,[status,booking_id])
+
+  }
+
+  const addPaymentId = async(booking_id,payment_id) => {
+    await db.execute(`UPDATE bookings SET payment_id = ? WHERE booking_id = ?`,[payment_id,booking_id])
+
+  }
+
+  const getPaymentId = async(booking_id) => {
+    const [result] = await db.execute(`SELECT payment_id FROM payments WHERE booking_id = ?`,[booking_id])
+    return result[0].payment_id
+
+  }
+
 module.exports = {
   createBooking,
   insertBookingItem,
   updateBookingTotal,
-  reduceTicketQuantity
+  reduceTicketQuantity,
+  updateBookingStatus,
+  getPaymentId,
+  addPaymentId
 };
 
