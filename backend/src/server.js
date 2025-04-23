@@ -12,7 +12,8 @@ const errorHandler = require('../src/middlewares/errorHandler')
 
 // app.use(cors())
 app.use(cors({
-    origin: 'http://localhost:5173'
+    origin: 'http://localhost:5173',
+    credentials:true,
   }));
 dotev.config();
 app.use('/uploads', express.static(path.join(__dirname,'uploads')))

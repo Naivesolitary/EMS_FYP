@@ -2,7 +2,7 @@ const db = require('../config/db');
 
 
 const createTicket = async (sales_start, sales_end, tickets, event_id) => {
-    console.log(sales_start,sales_end)
+  
     if (!tickets || tickets.length === 0) return [];
   
     // Prepare placeholder string: (?, ?, ?, ?, ?, ?, ?), ...
@@ -29,8 +29,8 @@ const createTicket = async (sales_start, sales_end, tickets, event_id) => {
       ];
     });
 
-    console.log('Placeholders:', placeholders);
-    console.log('Values:', values);
+    // console.log('Placeholders:', placeholders);
+    // console.log('Values:', values);
 
   
     const result = await db.execute(
@@ -38,7 +38,7 @@ const createTicket = async (sales_start, sales_end, tickets, event_id) => {
         INSERT INTO tickets (
           event_id, ticket_type, price, total_quantity, remaining_quantity, sales_start, sales_end
         ) VALUES ${placeholders}`,values)
-        console.log(result) 
+        // console.log(result) 
         return result[0]   
         
 
@@ -53,7 +53,7 @@ const createTicket = async (sales_start, sales_end, tickets, event_id) => {
 /// checked 
 const getTicketById = async(conn,ticket_id) => {
   const [ticket] = await conn.execute(`SELECT * FROM tickets WHERE ticket_id = ?`,[ticket_id])
-  console.log(ticket)
+  // console.log(ticket)
   return ticket[0]
 
 
@@ -65,7 +65,7 @@ const getTicketInfo = async(event_id) => {
 
   const res = await db.execute(`
     SELECT * FROM tickets WHERE event_id = ?`,[event_id]);
-    console.log(res)
+    // console.log(res)
 
     return res
   // console.log(res)  
@@ -78,7 +78,7 @@ const getSelectedTicket = async(ids) => {
   const [tickets] = await db.execute(` SELECT ticket_id, price, remaining_quantity FROM tickets WHERE ticket_id IN (${ids})`)
   return tickets
 }
-  // console.log(ticket)
+
 
 
 

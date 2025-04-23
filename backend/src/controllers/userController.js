@@ -32,8 +32,9 @@ const createUser =  asyncErrorHandler(async (req,res) => {
             httpOnly:true,
             maxAge: 7 * 24 * 60* 1000 // 7 days in milliseconds
          })
-        console.log('Generated Token: ', accessToken)
-        sendResponse(res,{statusCode:201,data:{userData,tokens:{accessToken,refreshToken}},message:'User created Successfully'})
+        console.log('Generated Token Access Token: ', accessToken)
+        console.log('Generated Token Refresh Token: ', refreshToken)
+        sendResponse(res,{statusCode:201,data:{payload,tokens:{accessToken,refreshToken}},message:'User created Successfully'})
 
 })
 
@@ -105,6 +106,7 @@ const verifyUser = asyncErrorHandler(async(req,res) => {
 
     const creds = req.body
      const user =  await getUser(creds)
+     console.log("user info in user Controller", user)
      if(!user)  throw new ApiError(404,'User not found, create an account');
      const payload = {
         id: user.id,
@@ -118,7 +120,7 @@ const verifyUser = asyncErrorHandler(async(req,res) => {
         httpOnly:true,
         maxAge: 7 * 24 * 60* 1000 // 7 days in milliseconds
      })
-     sendResponse(res,{data:{accessToken,refreshToken},message:'Login Successfully'})
+     sendResponse(res,{data:{payload,tokens:{accessToken,refreshToken}},message:'Login Successfully'})
       
 
 

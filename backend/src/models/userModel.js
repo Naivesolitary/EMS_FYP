@@ -39,6 +39,7 @@ const getUserByid =  async(id) => {
 }
 const saveUser =  async(details) => {
     const {name,email,password,phone,role} = details;
+    console.log("phone Number: ", phone)
     const [result] = await db.execute('INSERT INTO users (name,email,password,phone,role) VALUES (?,?,?,?,?)',[name, email, password,phone,role])
     return {id: result.insertId, name, email, role, password}
 
@@ -47,13 +48,15 @@ const saveUser =  async(details) => {
 
 const getUser = async(data) => {
     const {email,password} = data
-    const [result] = await db.execute('SELECT id, email, password, role from users WHERE email = ? ',[email]);
+    const [result] = await db.execute('SELECT user_id, email, password, role from users WHERE email = ? ',[email]);
     // console.log('select query result: ',result)
     const user = result[0]
-    console.log(result)
+    console.log(result.length)
+    console.log("user: ", user)
     if (result.length === 0) return null;
     
     const isPasswordCorrect = await bcrypt.compare(password, user.password);
+    console.log(isPasswordCorrect)
     if (!isPasswordCorrect) return null ;
     return  user 
 

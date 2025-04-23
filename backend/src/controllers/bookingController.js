@@ -1,5 +1,5 @@
 const {updateBookingTotal,createBooking,reduceTicketQuantity,insertBookingItem,getPaymentId,addPaymentId} = require('../models/bookingModel');
-const {getBookingId} = require('../models/paymentModel')
+const {getBookingId} = require('../models/paymentModel') 
 // const uuid4 = require('uuidv4')
 const { v4: uuidv4 } = require("uuid");
 require('dotenv').config()
@@ -22,7 +22,7 @@ const sendResponse = require('../utils/sendResponse');
     const newBooking = async (req, res) => {
       let conn;
       try{
-      const user_id = 2;
+      // const user_id = 2;
       const event_id = req.params.eventId;
       const {full_name,phone_number, tickets} = req.body;
       // console.log('REQUEST OBJECT',req)
