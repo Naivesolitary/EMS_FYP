@@ -14,6 +14,7 @@ import CreateEvent from './pages/CreateEvent.jsx'
 import Error from './components/Error.jsx'
 import PaymentFailed from './pages/PaymentFailed.jsx'
 import PaymentSuccess from './pages/PaymentSuccess.jsx'
+import { AuthProvider } from './context/AuthContext.jsx'
 
 
 
@@ -72,7 +73,10 @@ const router = createBrowserRouter([
 ])
 
 createRoot(document.getElementById('root')).render(
+  <AuthProvider>
   <RouterProvider router={router}/>
+
+  </AuthProvider>
 
   
 )

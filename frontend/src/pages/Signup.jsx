@@ -1,13 +1,13 @@
-"use client"
-
 import { useEffect, useState } from "react"
 import { FiEye, FiEyeOff, FiUser, FiMail, FiLock, FiPhone, FiUserCheck } from "react-icons/fi"
+import {useAuth} from '../context/AuthContext'
 import { Link } from "react-router-dom"
 import axios from "axios"
 const BASE_URL = import.meta.env.VITE_BACKEND_URL
 
 
 const Signup = ({ onSwitchToLogin }) => {
+  const {signup} = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [emailError, setEmailError] = useState("")
   const [signupForm, setSignupForm] = useState({
@@ -18,7 +18,7 @@ const Signup = ({ onSwitchToLogin }) => {
     role: "attendee",
   })
 
-  console.log(signupForm)
+  // console.log(signupForm)
 
   const validateEmail = (email) => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -46,10 +46,27 @@ const Signup = ({ onSwitchToLogin }) => {
     if (validateEmail(signupForm.email)) {
       console.log("Signup form submitted:", signupForm)
       // Add your signup logic here
+      try {
+        handleSignup()
+        // Optionally, reset form or redirect
+      } catch (error) {
+        console.error("Signup error:", error)
+      }
     }
+    
+  }
+  
+
+  const handleSignup = async() => {
+    const response =   await axios.post(`${BASE_URL}/api/auth/signup`, signupForm, { withCredentials: true })
+    const {payload,tokens} = response.data.data
+    console.log("Signup successful user Data:", payload)
+    console.log("Signup successful Token Data:", tokens)
+    
+    signup(payload,tokens.accessToken)
+
   }
 
-   const signUpRes = axios.post(`${BASE_URL}/api/auth/signup`,signupForm)
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">

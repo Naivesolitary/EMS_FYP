@@ -1,10 +1,12 @@
-"use client"
-
+import { BASE_URL } from "../config"
+import axios from "axios"
+import { useAuth } from "../context/AuthContext"
 import { useState } from "react"
 import { FiEye, FiEyeOff, FiMail, FiLock } from "react-icons/fi"
 import { Link } from "react-router-dom"
 
 const Login = ({ onSwitchToSignup }) => {
+  const {login} = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [loginForm, setLoginForm] = useState({
     email: "",
@@ -22,7 +24,21 @@ const Login = ({ onSwitchToSignup }) => {
   const handleSubmit = (e) => {
     e.preventDefault()
     console.log("Login form submitted:", loginForm)
+    try{
+       handleLogin()
+    }catch(err){
+       console.error('Error while Log in ', err)
+    }
+
     // Add your login logic here
+  }
+
+  const handleLogin = async() => {
+    const response =  await axios.post(`${BASE_URL}/api/auth/login`, loginForm, { withCredentials: true })
+    console.log(response)
+    const {payload,tokens} = response.data.data
+    
+    login(payload,tokens.accessToken)
   }
 
   return (

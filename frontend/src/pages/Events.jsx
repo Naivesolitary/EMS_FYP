@@ -61,7 +61,7 @@ export default function Events() {
     const fetchData = async() => {
       try{
               setIsLoadingTickets(true);
-             const {data:response} = await axios.get(`${BASE_URL}api/events/${selectedRawEvent.event_id}/ticket`) // array of ticket objects // by defaul axios return promise with data key
+             const {data:response} = await axios.get(`${BASE_URL}/api/events/${selectedRawEvent.event_id}/ticket`) // array of ticket objects // by defaul axios return promise with data key
              const transform = transformEventForModal(selectedRawEvent,response.data,false)
              setSelectedEvent(transform)
 
@@ -286,7 +286,7 @@ return () => {
                     <div className="relative h-48 w-full">
                         {event.images?.length > 0 && (
                                 <img
-                              src={`${BASE_URL}${event.images[0].image_url}`|| '/placeholder.svg'}
+                              src={`${BASE_URL}/${event.images[0].image_url}`|| '/placeholder.svg'}
                               alt={event.title}
                             className="object-cover w-full h-full"
                           />
@@ -364,7 +364,9 @@ return () => {
         <EventModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
+          openModal = {() => setIsModalOpen(true)}
           event={selectedEvent}
+          modalType = {() => setModalType('book')}
         />
       )}
 

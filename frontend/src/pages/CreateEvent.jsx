@@ -5,6 +5,7 @@ import Datetime from 'react-datetime';
 import "react-datetime/css/react-datetime.css";
 // import { MdOutlineCancel } from "react-icons/md";
 import { MdOutlineDeleteForever as Delete } from "react-icons/md";
+import { useAuth } from '../context/AuthContext';
 import { GoPeople as People } from "react-icons/go";
 import { CiLocationOn as Location } from "react-icons/ci";
 import { LuTicketSlash as Ticket } from "react-icons/lu";
@@ -12,7 +13,6 @@ import { AiOutlineClose } from "react-icons/ai";
 import { FiTag as Tag } from "react-icons/fi";
 import { CiCalendar as Calender } from "react-icons/ci";
 import { FaRegFileLines as Text } from "react-icons/fa6";
-import { IoMdAdd } from "react-icons/io";
 import axios from 'axios'
 // import { v4 as uuidv4 } from 'uuid'; 
 import uuid from 'uuid4'
@@ -22,6 +22,21 @@ import CustomSelectDropdown from '../components/CustomSelectDropdown';
 
 
 export default function CreateEvent() {
+
+    const {user} = useAuth()
+    const allowedRoutes = ['event_organizer','admin']
+    
+    if(!user || !allowedRoutes.includes(user.role)){
+        return (
+          <div className="text-center text-red-600 font-bold mt-10">
+              You are not authorized to create an event.
+            </div>
+
+        )
+         
+    }
+
+    else {
     const [images,setImages] = useState([])
 
     const [tickets,setTicket] = useState([{id:uuid(),type:'Standard',quantity:100,price:100}]);
@@ -547,4 +562,6 @@ export default function CreateEvent() {
 </div>
 
   )
+}
+
 }

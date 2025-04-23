@@ -15,7 +15,7 @@ import {
   FaRedo
 } from "react-icons/fa";
 
-export function EventModal({ isOpen, onClose, event }) {
+export function EventModal({ isOpen, onClose, event,modalType,openModal }) {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [mounted, setMounted] = useState(false);
   const [error, setError] = useState(null);
@@ -137,7 +137,7 @@ export function EventModal({ isOpen, onClose, event }) {
                     }`}
                   >
                     <img 
-                      src={`${BASE_URL}${image.image_url}`} 
+                      src={`${BASE_URL}/${image.image_url}`} 
                       alt={image.alt || `Event image ${index + 1}`} 
                       className="h-full w-full object-contain" 
                       loading="lazy"
@@ -178,7 +178,7 @@ export function EventModal({ isOpen, onClose, event }) {
             </>
           ) : (
             <img
-              src={event.images?.[0]?.image_url ? `${BASE_URL}${event.images[0].image_url}` : '/placeholder-event.jpg'}
+              src={event.images?.[0]?.image_url ? `${BASE_URL}/${event.images[0].image_url}` : '/placeholder-event.jpg'}
               alt={event.images?.[0]?.alt || event.name || "Event image"}
               className="h-full w-full object-cover rounded-lg"
               loading="lazy"
@@ -314,6 +314,12 @@ export function EventModal({ isOpen, onClose, event }) {
 
                   <button
                     disabled={ticket.remaining_quantity === 0}
+                    onClick={() => {
+                      onClose()  // closes the current modal i.e event Modal
+                      modalType()  // set the current modal type to 'book'
+                      openModal()  // open the current modal i.e Booking Modal
+                      
+  }}
                     className={`mt-3 w-full px-6 py-3 rounded-lg font-medium text-base transition-all ${
                       ticket.remaining_quantity > 0
                         ? "bg-teal-600 hover:bg-teal-700 text-white shadow-md hover:shadow-lg"
