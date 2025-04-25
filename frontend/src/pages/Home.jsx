@@ -7,7 +7,7 @@ import { checkRole } from "../services/checkRole";
 import Footer from "../components/Footer";
 
 const Home = () => {
-  const {user} = useAuth()
+  const {auth} = useAuth()
   const [writerEffect, setWriterEffect] = useState();
   const featuredEvents = [
     {
@@ -88,7 +88,7 @@ const Home = () => {
                         <span className="text-black">Find Events</span>
                       </Link>
                     </div>
-                    {user && checkRole(user) &&
+                    {auth?.user && checkRole(auth?.user) &&
                     <div className="mt-3 sm:mt-0 sm:ml-3">
                       <Link
                         to="/create-event"

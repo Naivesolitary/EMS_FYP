@@ -31,6 +31,23 @@ const addToBlacklist = async(token,exp,tokenType = 'access') => {
     // return {msg: 'successfully black-listed'}
 }
 
+
+// Clean up expired tokens
+const cleanupExpiredTokens = async() => {
+    const query = `
+    DELETE FROM blackelisted_tokens WHERE expires_at < NOW()`
+    const [result] = await db.execute(query)
+    console.log(` cleaned up ${result.affectedRows} expired tokens`);
+    return result
+}
+
+
+
+
+
+
+ 
+
 const getUserByid =  async(id) => {
     
     const [result] = await db.execute('SELECT * FROM users where id = ? ',[id])
@@ -66,5 +83,7 @@ const getUser = async(data) => {
 }
 
 module.exports = {
-    saveUser, getUser, getAllUser,getUserByid,getBlacklist,addToBlacklist
+    saveUser, getUser, getAllUser
+    ,getUserByid,getBlacklist,addToBlacklist,
+    cleanupExpiredTokens
 }

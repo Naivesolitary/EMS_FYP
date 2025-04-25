@@ -33,8 +33,8 @@ export const AuthProvider = ({children}) => {
                     const response = await axios.post(`/api/auth/refresh-token`,{},{
                         withCredentials:true
                      })
-                     const {newAccessToken,user} = response.data.data
-                     setAuth({user,accessToken:newAccessToken})
+                     const {newAccessToken,payload} = response.data.data
+                     setAuth({user:payload,accessToken:newAccessToken})
                     console.log("New AccessToken generated during page reload: ", newAccessToken)
                 }catch(err){
                   console.log("Session restore failed: ",err);

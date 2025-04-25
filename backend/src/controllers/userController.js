@@ -4,7 +4,7 @@ const asyncErrorHandler = require('../utils/asyncErrorHandler');
 const sendResponse = require('../utils/sendResponse')
 const ApiError = require('../utils/ApiError')
 require('dotenv').config();
-const {saveUser,getUser,getAllUser, getUserByid,addToBlacklist,getBlacklist}  = require('../models/userModel')
+const {saveUser,getUser,getAllUser, getUserByid,addToBlacklist,getBlacklist,cleanupExpiredTokens}  = require('../models/userModel')
 const {generateToken,generateRefreshToken} = require('../middlewares/jwtAuth')
 
 const allUsers = asyncErrorHandler(async(req,res) => {
@@ -58,7 +58,7 @@ const newAccessToken = asyncErrorHandler(async(req,res) => {
         }
      
         const payload = {
-            id:decoded.user_id,
+            id:decoded.id,
             email: decoded.email,
             role: decoded.role
         }
@@ -159,6 +159,7 @@ const logout = asyncErrorHandler(async(req,res) => {
             }
             const expiryDate = new Date(decoded.exp * 1000);
             await addToBlacklist(refreshToken, expiryDate, 'refresh');
+            await cleanupExpiredTokens()
             console.log('Refresh token blacklisted');
             res.clearCookie('refreshToken',{
             httpOnly:true,
