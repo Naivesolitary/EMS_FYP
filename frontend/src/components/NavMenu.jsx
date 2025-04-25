@@ -6,13 +6,21 @@ import Dragon from '../images/Dragon Sky.jpg';
 import Twilight from '../images/Twilight.png';
 import Cloud from '../images/Cloud.png'
 import { useAuth } from '../context/AuthContext';
+import { IoIosNotificationsOutline  as Notification} from "react-icons/io";
+import { useNavigate } from 'react-router-dom';
 
 export default function NavMenu() {
-    const {auth} = useAuth()
+    const {auth,logout} = useAuth()
+    const [isDropdownOpen, setIsDropdown] = useState(false);
+    const navigate = useNavigate();
     const navState = ( {isActive} ) => `font-medium border-b-2 transition duration-300 ${
     isActive ? 'border-red-600' : 'border-transparent hover:border-green-400'
   }`
 
+   const handleProfileClick = (e) => {
+    e.preventDefault();
+    setIsDropdown(!isDropdownOpen)
+   };
   //  const profilePicUrl = "https://i.pravatar.cc/40"
   
 
@@ -31,13 +39,41 @@ export default function NavMenu() {
           </div>
           <div className="flex items-center space-x-4">
              {auth.accessToken ? (
-              <Link to="/profile">
-              <img
-                src={Cloud}
-                alt="Profile"
-                className="w-15 h-15 rounded-full object-cover border-2 border-gray-300 hover:border-emerald-400 transition duration-300"
-              />
-            </Link>) : (
+              <div className="flex items-center space-x-4 relative">
+                            <Notification 
+                                className='text-gray-600 hover:text-emerald-600 transition duration-300' 
+                                size={24}
+                            />
+                            <div className="relative">
+                                <button 
+                                    onClick={handleProfileClick}
+                                    className="focus:outline-none"
+                                >
+                                    <img
+                                        src={Cloud}
+                                        alt="Profile"
+                                        className="w-10 h-10 rounded-full object-cover border-2 border-gray-300 hover:border-emerald-400 transition duration-300"
+                                    />
+                                </button>
+                                
+                                {isDropdownOpen && (
+                                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                                        <button
+                                            onClick={handleViewProfile}
+                                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                                        >
+                                            View Profile
+                                        </button>
+                                        <button
+                                            onClick={handleLogout}
+                                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                                        >
+                                            Logout
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        </div>) : (
             <div>
             <Link to= '/login' className="text-black font-medium cursor-pointer  mr-4">Login</Link>
             <Link to="/signup" className="bg-black text-white px-4 py-2 rounded-md font-medium cursor-pointer">

@@ -3,8 +3,8 @@ import Twilight from '../images/Twilight.png';
 import Moon from '../images/Moon.png';
 import Cloud from '../images/Cloud.png';
 import ClipLoader from 'react-spinners/ClipLoader';
-import axios from  'axios';
-import useAxiosPrivate from '../hooks/useAxiosPrivate';
+import axios from  '../services/axios'
+
 import {BASE_URL} from '../config'
 import { useState, useEffect } from 'react';
 import { FaCalendarAlt, FaMapMarkerAlt, FaSearch, FaArrowLeft, FaArrowRight, FaDAndDBeyond, FaGlideG } from 'react-icons/fa';;
@@ -17,7 +17,7 @@ import Booking from './Booking'
 //  
 
 export default function Events() {
-  const axiosPrivate = useAxiosPrivate()
+  
   const [events, setEvents] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -40,7 +40,7 @@ export default function Events() {
       setIsLoading(true);
       setTimeout(async () => {
         try {
-          const { data } = await axiosPrivate.get('/api/events');
+          const { data } = await axios.get('/api/events');
           setEvents(data.data);
           console.log(data.data);
         } catch (error) {
