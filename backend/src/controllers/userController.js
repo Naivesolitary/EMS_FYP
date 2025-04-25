@@ -5,7 +5,7 @@ const sendResponse = require('../utils/sendResponse')
 const ApiError = require('../utils/ApiError')
 require('dotenv').config();
 const {saveUser,getUser,getAllUser, getUserByid,addToBlacklist,getBlacklist}  = require('../models/userModel')
-const {generateToken,generateRefreshToken} = require('../middlewares/jwt')
+const {generateToken,generateRefreshToken} = require('../middlewares/jwtAuth')
 
 const allUsers = asyncErrorHandler(async(req,res) => {
     const users = await getAllUser();
@@ -50,18 +50,21 @@ const newAccessToken = asyncErrorHandler(async(req,res) => {
     if(isBlacklisted)  throw new ApiError(403,'Refresh token has been revoked');
 
     
-
-
+       
         const decoded = jwt.verify(refreshToken,process.env.JWT_SECRET);
-        if(!decoded) throw new ApiError(403,'Invalid refresh token')
-
-        const newAccessToken = generateToken({
+      
+        if(decoded.type !== 'refresh'){
+            throw new ApiError(403,'Not a valid refresh token')
+        }
+     
+        const payload = {
             id:decoded.id,
             email: decoded.email,
             role: decoded.role
-        });
+        }
+        const newAccessToken = generateToken(payload);
 
-        sendResponse(res,{statusCode:201,data:{newAccessToken},message:'new Access Token generated successfully'})
+        sendResponse(res,{statusCode:201,data:{payload,newAccessToken},message:'new Access Token generated successfully'})
         
 })
 
@@ -118,7 +121,7 @@ const verifyUser = asyncErrorHandler(async(req,res) => {
 
      res.cookie('refreshToken',refreshToken,{
         httpOnly:true,
-        maxAge: 7 * 24 * 60* 1000 // 7 days in milliseconds
+        maxAge: 7 * 24 * 60 * 1000 // 7 days in milliseconds
      })
      sendResponse(res,{data:{payload,tokens:{accessToken,refreshToken}},message:'Login Successfully'})
       

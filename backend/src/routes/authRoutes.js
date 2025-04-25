@@ -6,10 +6,10 @@ const {jwtAuth} = require('../middlewares/jwtAuth')
 
 // using jwtAuthmiddleware 
 router.route('/').get(allUsers)
-router.route('/profile').get(jwtAuth,viewProfile);
+router.route('/profile').get([jwtAuth,viewProfile]);
 router.route('/user/:id').get(getUserById);
-router.route('/refresh-token').post(jwtAuth,newAccessToken);
-router.route('/logout').post(jwtAuth,logout)
+router.route('/refresh-token').post(newAccessToken);
+router.route('/logout').post([jwtAuth,logout])
 
 
 router.route('/login').post(verifyUser);
