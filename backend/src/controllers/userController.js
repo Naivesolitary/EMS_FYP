@@ -25,7 +25,7 @@ const createUser =  asyncErrorHandler(async (req,res) => {
         user.password = hashedPassword;
         const userData = await saveUser(user)
         if(!userData) throw new ApiError(500,'Signup failed')
-        const payload = {id:userData.id,email: userData.email,role:userData.role}
+        const payload = {id:userData.user_id,email: userData.email,role:userData.role}
         const accessToken = generateToken(payload);
         const refreshToken = generateRefreshToken(payload);
         res.cookie('refreshToken',refreshToken,{
@@ -58,7 +58,7 @@ const newAccessToken = asyncErrorHandler(async(req,res) => {
         }
      
         const payload = {
-            id:decoded.id,
+            id:decoded.user_id,
             email: decoded.email,
             role: decoded.role
         }
@@ -73,7 +73,7 @@ const viewProfile = asyncErrorHandler(async (req,res) => {
  
         const userData = req.decoded;
         console.log('User Data hi: ',userData)
-        const user = await getUserByid(userData.id)
+        const user = await getUserByid(userData.user_id)
         if(!user) throw new ApiError(404,'User not found')
         sendResponse(res,{data:user})
  
@@ -112,7 +112,7 @@ const verifyUser = asyncErrorHandler(async(req,res) => {
      console.log("user info in user Controller", user)
      if(!user)  throw new ApiError(404,'User not found, create an account');
      const payload = {
-        id: user.id,
+        id: user.user_id,
         email: user.email,
         role: user.role
      }

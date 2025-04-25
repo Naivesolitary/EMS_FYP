@@ -9,7 +9,7 @@ const upload = require('../middlewares/uploadMiddleware')
 
 
 
-router.route('/').get([jwtAuth,getEvents])
+router.route('/').get(getEvents)
 router.route('/images/:eventid').get(images)
 router.post('/',upload.array('images',10),[jwtAuth,createEvent])
 // router.post('/',createEvent)
