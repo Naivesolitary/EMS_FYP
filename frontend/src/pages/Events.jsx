@@ -4,17 +4,20 @@ import Moon from '../images/Moon.png';
 import Cloud from '../images/Cloud.png';
 import ClipLoader from 'react-spinners/ClipLoader';
 import axios from  'axios';
+import useAxiosPrivate from '../hooks/useAxiosPrivate';
 import {BASE_URL} from '../config'
 import { useState, useEffect } from 'react';
 import { FaCalendarAlt, FaMapMarkerAlt, FaSearch, FaArrowLeft, FaArrowRight, FaDAndDBeyond, FaGlideG } from 'react-icons/fa';;
 import { EventModal } from '../components/EventModal'; // Add this import
 import Booking from './Booking'
 
+
 // *  NOTES : here selectedRaWEvent state variable tracks the event info without tickets info i.e tickets : [] or before tickects are fetch;
 
 //  
 
 export default function Events() {
+  const axiosPrivate = useAxiosPrivate()
   const [events, setEvents] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -37,7 +40,7 @@ export default function Events() {
       setIsLoading(true);
       setTimeout(async () => {
         try {
-          const { data } = await axios.get('/api/events');
+          const { data } = await axiosPrivate.get('/api/events');
           setEvents(data.data);
           console.log(data.data);
         } catch (error) {
@@ -234,6 +237,7 @@ return () => {
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans relative">
+  
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <h1 className="text-3xl font-bold text-gray-800 mb-8">All Events</h1>
 

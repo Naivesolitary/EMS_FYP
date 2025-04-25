@@ -2,10 +2,12 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import opImg from "../images/one-piece.png";
+import {useAuth} from "../context/AuthContext"
+import { checkRole } from "../services/checkRole";
 import Footer from "../components/Footer";
 
 const Home = () => {
-  // Sample events data - replace with your actual data
+  const {user} = useAuth()
   const [writerEffect, setWriterEffect] = useState();
   const featuredEvents = [
     {
@@ -86,6 +88,7 @@ const Home = () => {
                         <span className="text-black">Find Events</span>
                       </Link>
                     </div>
+                    {user && checkRole(user) &&
                     <div className="mt-3 sm:mt-0 sm:ml-3">
                       <Link
                         to="/create-event"
@@ -93,7 +96,7 @@ const Home = () => {
                       >
                         <span className="text-white">Create Event</span>
                       </Link>
-                    </div>
+                    </div>}
                   </div>
                   <div className="mt-8 max-w-md mx-auto sm:mx-0">
                     <div className="relative">

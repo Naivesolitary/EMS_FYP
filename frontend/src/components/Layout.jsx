@@ -2,8 +2,13 @@ import React from 'react'
 import NavMenu from './NavMenu'
 import { Outlet } from 'react-router-dom'
 import Footer from './Footer'
+import { useEffect } from 'react'
+import { useAuth } from '../context/AuthContext'
+
 
 export default function Layout({children}) {
+  
+
   return (
     
      <div className="min-h-screen flex flex-col">

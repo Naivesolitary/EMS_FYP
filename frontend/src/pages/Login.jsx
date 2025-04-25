@@ -1,6 +1,6 @@
 import { BASE_URL } from "../config"
-import axios from "axios"
-import { useAuth } from "../context/AuthContext"
+import axios from "../services/axios"
+import {useAuth}  from "../context/AuthContext"
 import { useState } from "react"
 import { FiEye, FiEyeOff, FiMail, FiLock } from "react-icons/fi"
 import { Link } from "react-router-dom"

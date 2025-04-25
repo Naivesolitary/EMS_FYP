@@ -15,6 +15,7 @@ import Error from './components/Error.jsx'
 import PaymentFailed from './pages/PaymentFailed.jsx'
 import PaymentSuccess from './pages/PaymentSuccess.jsx'
 import { AuthProvider } from './context/AuthContext.jsx'
+import UserProfile from './pages/UserProfile.jsx'
 
 
 
@@ -63,6 +64,10 @@ const router = createBrowserRouter([
       {
         path:'payment-failed',
         element:<PaymentFailed/>
+      },
+      {
+        path:'profile',
+        element:<UserProfile/>
       }
 
       
