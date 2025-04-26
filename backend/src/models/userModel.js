@@ -15,8 +15,8 @@ const getAllUser = async() => {
 const getBlacklist = async(token,tokenType = 'access') =>{
     const [result] = await db.execute(`SELECT * FROM blacklisted_tokens WHERE token = ? AND token_type = ?`,[token,tokenType]);
     // const blacklisted_data = result[0]
-    console.log(result)
-    console.log(result.length)
+    // console.log(result)
+    // console.log(result.length)
     if (result.length === 0) return null;
     return result;
 
@@ -68,8 +68,8 @@ const getUser = async(data) => {
     const [result] = await db.execute('SELECT user_id, email, password, role from users WHERE email = ? ',[email]);
     // console.log('select query result: ',result)
     const user = result[0]
-    console.log(result.length)
-    console.log("user: ", user)
+    // console.log(result.length)
+    // console.log("user: ", user)
     if (result.length === 0) return null;
     
     const isPasswordCorrect = await bcrypt.compare(password, user.password);

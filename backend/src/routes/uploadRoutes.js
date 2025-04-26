@@ -48,3 +48,5 @@ router.post('/:folder',(req,res,next) => {
         }
     })
 })
+
+module.exports = router

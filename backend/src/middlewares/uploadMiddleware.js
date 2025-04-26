@@ -25,6 +25,7 @@ const getStorage = (subfolder) => {
 
 
 const getUploader = (subfolder) => multer({storage:getStorage(subfolder)});
+module.exports = getUploader;
 
 // const storage = multer.diskStorage({
 //     destination: (req,file,cb) =>{
@@ -41,5 +42,3 @@ const getUploader = (subfolder) => multer({storage:getStorage(subfolder)});
 // })
 
 // const upload = multer ({storage});
-
-module.exports = getUploader;

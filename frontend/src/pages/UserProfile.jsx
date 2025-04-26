@@ -1,20 +1,79 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import {FiUser,FiMail, FiPhone, FiLock, FiUpload, FiSave,
   FiHeart,FiCalendar,FiEdit,FiEye,FiEyeOff,FiCheck,FiX,
 } from "react-icons/fi"
 import { checkRole } from "../services/checkRole"
 import { useAuth } from "../context/AuthContext"
+import { BASE_URL } from "../config"
+import useAxiosPrivate from '../hooks/useAxiosPrivate'
+import { useNavigate } from "react-router-dom";
+import Notification from "../components/Notification"
 
 const UserProfile = () => {
   // Sample user data - would come from props or context in a real app
+  const navigate = useNavigate()
   const {auth} = useAuth()
-  const [user, setUser] = useState({
-    username: "johndoe",
-    email: "john.doe@example.com",
-    phone: "+1 (555) 123-4567",
+  if(!auth || !auth.accessToken){
+    return navigate('/')
+  }
+  const [notification, setNotification] = useState({
+    show: false,
+    message: "",
+    type: "success" // or "error"
+  });
+  const axiosPrivate = useAxiosPrivate()
+  const [formData, setFormData] = useState({
+    username: "",
+    email: "",
+    phone: "",
     password: "••••••••",
-    profileImage: "/placeholder.svg?height=200&width=200",
+    profileImage: "/placeholder.svg?height=200&width=200"
   })
+
+
+  const showNotification  = (message, type = "success") => {
+    setNotification({
+      show:true,
+      message,
+      type
+    })
+  }
+  // const [user, setUser] = useState({
+  //   username: "johndoe",
+  //   email: "john.doe@example.com",
+  //   phone: "+1 (555) 123-4567",
+  //   password: "••••••••",
+  //   profileImage: "/placeholder.svg?height=200&width=200",
+  // })  
+  
+  const [user, setUser] = useState({})
+
+
+
+  useEffect(() => {
+    const getUserInfo = async() => {
+      const response = await axiosPrivate.get(`/api/users/profile`);
+      console.log("user-info: ", response.data.data)
+      const {name,email,phone,image_url} = response.data.data
+      // console.log("name: ",name, "email: ",email, "phone: ",phone, "password: ",password)
+      setFormData(prev => ({
+        ...prev, // Keep existing defaults
+        username: name || "",
+        email: email || "",
+        phone: phone || "",
+        profileImage: image_url || "/placeholder.svg?height=200&width=200"
+      }));
+      
+    }
+    getUserInfo()
+  },[])
+
+  // Add this new useEffect to sync formData with user
+useEffect(() => {
+  setFormData({ ...user });
+}, [user]);
+
+  console.log("USER: ",user)
 
   // Sample events data
   const [favouriteEvents, setFavouriteEvents] = useState([
@@ -31,7 +90,7 @@ const UserProfile = () => {
 
   const [activeTab, setActiveTab] = useState("profile")
   const [isEditing, setIsEditing] = useState(false)
-  const [formData, setFormData] = useState({ ...user })
+
   const [imageFile, setImageFile] = useState(null)
   const [showCurrentPassword, setShowCurrentPassword] = useState(false)
   const [showNewPassword, setShowNewPassword] = useState(false)
@@ -43,6 +102,8 @@ const UserProfile = () => {
   })
   const [passwordMatch, setPasswordMatch] = useState(true)
 
+
+  console.log("Form Data: ", formData)
   // Handle form input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target
@@ -71,28 +132,53 @@ const UserProfile = () => {
   }
 
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async(e) => {
     e.preventDefault()
+
+  
 
     // Check if passwords match before submitting
     if (passwordData.newPassword && passwordData.newPassword !== passwordData.confirmPassword) {
+      console.log("Passwords do not match")
       return // Don't submit if passwords don't match
     }
 
-    // Here you would typically validate the current password against the stored one
-    // and update the user's password in your backend
+     try{
+       let uploadedImagePath = formData.profileImage
+       if(imageFile){
+        const uploadedPath = await uploadImage()
+        if(uploadedPath){
+          uploadedImagePath = uploadedPath
+        }
+       }
 
-    setUser(formData)
-    setIsEditing(false)
-    setPasswordData({
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
-    })
+       const updateData = {
+        username: formData.username,
+        email: formData.email,
+        phone: formData.phone,
+        profileImage: uploadedImagePath,
+        ...(passwordData.newPassword && {password: passwordData.newPassword}),
+       }
+
+       const response = await axiosPrivate.put('/api/users/profile',updateData)
+       showNotification("Profile updated successfully")
+      //  console.log("Profile updated successfully: ", response.data)
+
+       setUser(updateData)
+       setIsEditing(false)
+       setPasswordData({
+        currentPassword:"",
+        newPassword:"",
+        confirmPassword: "",
+       })
+       console.log("Profile updated:", formData)
+       console.log("Password updated:", passwordData)
+     }catch(error){
+      console.error("Error updating profile: ",error)     }
+
+ 
 
     // Here you would typically send the updated data to your backend
-    console.log("Profile updated:", formData)
-    console.log("Password updated:", passwordData)
   }
 
   // Handle image upload
@@ -113,8 +199,35 @@ const UserProfile = () => {
     }
   }
 
+
+  // JUST WORKING FINE :)
+  const uploadImage = async () => {
+    if(!imageFile) return null
+    const formData = new FormData()
+    formData.append('image',imageFile)
+
+    try{
+      const response = await axiosPrivate.post('/api/upload/profile',formData,{
+        headers:{
+          'Content-Type':'multipart/form-data'
+        }
+      })
+      console.log(response.data.filePath)
+      return response.data.filePath
+    }catch(err){console.error("Image upload failed: ", err)}
+
+
+  }
+
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100 p-4">
+      {notification.show && (
+        <Notification
+          message={notification.message}
+          type={notification.type}
+          onClose={() => setNotification({...notification,show:false})}
+        />
+      )}
       <div className="w-full max-w-3xl bg-white rounded-xl shadow-lg border-2 border-gray-200">
         <div className="p-6 border-b border-gray-200">
           <h1 className="text-xl font-semibold text-gray-800">User Profile</h1>
@@ -157,7 +270,7 @@ const UserProfile = () => {
               <div className="flex justify-center mb-8">
                 <div className="relative w-28 h-28 md:w-32 md:h-32 ring-4 ring-gray-50 rounded-full shadow-md">
                   <img
-                    src={formData.profileImage || "/placeholder.svg"}
+                    src={`${BASE_URL}${formData.profileImage}` || "/placeholder.svg"}
                     alt="Profile"
                     className="w-full h-full object-cover rounded-full"
                   />

@@ -8,7 +8,9 @@ const authRoutes = require('./routes/authRoutes')
 const eventRoutes = require('./routes/eventRoutes')
 const paymentRoutes = require('../src/routes/paymentRoutes')
 const errorHandler = require('../src/middlewares/errorHandler')
-
+const {updateProfile} = require('../src/controllers/profileController')
+const profileRoutes = require('./routes/profileRoutes')
+const uploadRoutes = require('./routes/uploadRoutes')
 
 // app.use(cors())
 app.use(cors({
@@ -25,6 +27,8 @@ app.use(cookieParser()); // To parse cookies (necessary for accessing cookies)
 app.use('/api/auth', authRoutes);
 app.use('/api/events',eventRoutes);
 app.use('/api/payment',paymentRoutes);
+app.use('/api/upload',uploadRoutes)
+app.use('/api/users',profileRoutes)
 
 app.use(errorHandler)
 
