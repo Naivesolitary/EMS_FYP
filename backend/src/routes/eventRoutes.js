@@ -5,7 +5,9 @@ const {getImages} = require('../models/eventModel');
 const {jwtAuth} = require('../middlewares/jwtAuth')
 const {checkTicket,ticketById,} = require('../controllers/ticketController')
 const {bookEventTicket,newBooking} = require('../controllers/bookingController')
-const upload = require('../middlewares/uploadMiddleware')
+const getUploader = require('../middlewares/uploadMiddleware')
+
+const upload = getUploader('events');
 
 
 
@@ -18,7 +20,7 @@ router.route('/:id').get(getEventByid).patch(updateEvent).delete(deleteEvent);
 router.route('/:id/tickets').get(ticketById).post(ticket);
 router.route('/:eventid/ticket').get(checkTicket)
 // router.route('/:eventId/bookings').post(bookEventTicket)
-router.route('/:eventId/bookings').post(newBooking)
+router.route('/:eventId/bookings').post([jwtAuth,newBooking])
 // router.post('/:id/booking')
 
 

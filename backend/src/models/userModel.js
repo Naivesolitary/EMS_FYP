@@ -35,7 +35,7 @@ const addToBlacklist = async(token,exp,tokenType = 'access') => {
 // Clean up expired tokens
 const cleanupExpiredTokens = async() => {
     const query = `
-    DELETE FROM blackelisted_tokens WHERE expires_at < NOW()`
+    DELETE FROM blacklisted_tokens WHERE expires_at < NOW()`
     const [result] = await db.execute(query)
     console.log(` cleaned up ${result.affectedRows} expired tokens`);
     return result

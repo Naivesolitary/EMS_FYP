@@ -13,7 +13,7 @@ import { AiOutlineClose } from "react-icons/ai";
 import { FiTag as Tag } from "react-icons/fi";
 import { CiCalendar as Calender } from "react-icons/ci";
 import { FaRegFileLines as Text } from "react-icons/fa6";
-import axios from 'axios'
+import useAxiosPrivate from '../hooks/useAxiosPrivate';
 // import { v4 as uuidv4 } from 'uuid'; 
 import uuid from 'uuid4'
 import moment from 'moment';
@@ -23,10 +23,11 @@ import CustomSelectDropdown from '../components/CustomSelectDropdown';
 
 export default function CreateEvent() {
 
-    const {user} = useAuth()
+    const {auth} = useAuth()
+    const axiosPrivate = useAxiosPrivate();
     const allowedRoutes = ['event_organizer','admin']
     
-    if(!user || !allowedRoutes.includes(user.role)){
+    if(!auth.user || !allowedRoutes.includes(auth.user.role)){
         return (
           <div className="text-center text-red-600 font-bold mt-10">
               You are not authorized to create an event.
@@ -42,7 +43,7 @@ export default function CreateEvent() {
     const [tickets,setTicket] = useState([{id:uuid(),type:'Standard',quantity:100,price:100}]);
     console.log(tickets);
     const [event,setEvent] = useState(
-      {title:'',description:'' ,category:'', organizer_id: 1, category_id: 2,venue_id:6,
+      {title:'',description:'' ,category:'', organizer_id: auth?.user?.id , category_id: 2,venue_id:6,
         start_datetime:moment(),end_datetime:moment(),venue:'',tickets:tickets ,max_attendees:''
 
       });
@@ -50,17 +51,7 @@ export default function CreateEvent() {
       console.log(event.start_datetime)
       
      
-      // console.log(images[0]);
-
-      // if (!event.title || !event.start_datetime || tickets.length === 0) {
-      //   alert("Please fill all required fields.");
-      //   return;
-      // }
-
-
-
-   
-    // const [formData, setFormData] = useState({}); 
+    
 
     // Sync tickets with eventDetails
     useEffect(() => {  
@@ -95,7 +86,7 @@ export default function CreateEvent() {
 
       try{
 
-     const response = await axios.post('http://localhost:3000/api/events',formData,{
+     const response = await axiosPrivate.post('http://localhost:3000/api/events',formData,{
         headers:{
           'Content-Type':'multipart/form-data'
         }})

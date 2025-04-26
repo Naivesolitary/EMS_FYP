@@ -3,7 +3,7 @@ import Twilight from '../images/Twilight.png';
 import Moon from '../images/Moon.png';
 import Cloud from '../images/Cloud.png';
 import ClipLoader from 'react-spinners/ClipLoader';
-import axios from  '../services/axios'
+import axios, { axiosPrivate } from  '../services/axios'
 
 import {BASE_URL} from '../config'
 import { useState, useEffect } from 'react';
@@ -131,7 +131,7 @@ return () => {
       
       
       // Send booking data to the backend
-      const response = await axios.post(`/api/events/${selectedEvent.event_id}/bookings`, {
+      const response = await axiosPrivate.post(`/api/events/${selectedEvent.event_id}/bookings`, {
         // user_id: userId, 
         // event_id: selectedEvent.event_id,
         full_name: fullName,

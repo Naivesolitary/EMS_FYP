@@ -22,7 +22,8 @@ const sendResponse = require('../utils/sendResponse');
     const newBooking = async (req, res) => {
       let conn;
       try{
-      // const user_id = 2;
+      const user_id = req.decoded.id
+      // console.log("user_id : ", req.decoded)
       const event_id = req.params.eventId;
       const {full_name,phone_number, tickets} = req.body;
       // console.log('REQUEST OBJECT',req)

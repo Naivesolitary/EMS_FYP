@@ -10,7 +10,7 @@ const createEvent = asyncErrorHandler(async (req,res,next) => {
       const eventData = JSON.parse(req.body.event);
       console.log(eventData)
       const imageStack = req.files.map(file => ({
-        path:path.posix.join('uploads',file.filename),  //POSIX always uses forward slashes
+        path:path.posix.join('uploads/events',file.filename),  //POSIX always uses forward slashes
         filename : file.filename}))
       
 

@@ -16,7 +16,9 @@ app.use(cors({
     credentials:true,
   }));
 dotev.config();
+console.log(__dirname)
 app.use('/uploads', express.static(path.join(__dirname,'uploads')))
+
 app.use(express.json()) // To parse JSON bodies
 app.use(cookieParser()); // To parse cookies (necessary for accessing cookies)
 // app.use(express.urlencoded())
