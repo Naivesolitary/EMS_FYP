@@ -18,6 +18,8 @@ import { AuthProvider } from './context/AuthContext.jsx'
 import UserProfile from './pages/UserProfile.jsx'
 import AdminDashboard from './pages/Admin.jsx'
 import Admin from './pages/Admin.jsx'
+import AboutPage from './pages/Aboutus.jsx'
+import ContactPage from './pages/Contact.jsx'
 
 
 
@@ -78,7 +80,16 @@ const router = createBrowserRouter([
       {
         path:'admin-dashboard',
         element:<Admin/>
-      }
+      },
+      {
+        path:'about-us',
+        element:<AboutPage/>
+      },
+      {
+        path:'contact',
+        element:<ContactPage/>
+      },
+
     
     ]}
 ])

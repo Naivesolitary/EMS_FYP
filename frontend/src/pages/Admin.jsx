@@ -9,7 +9,7 @@ import FilterComponent from "../components/FilterComponent"
 import PaginationComponent from "../components/PaginationComponent"
 import { FaCalendarAlt, FaUserCheck, FaUserClock, FaTicketAlt } from "react-icons/fa"
 import userAxiosPrivate from "../hooks/useAxiosPrivate"
-import {filterByDateRange,filterBySearchTerm,filterByStatus} from "../services/formatter"
+
 
 
 const Admin = () => {

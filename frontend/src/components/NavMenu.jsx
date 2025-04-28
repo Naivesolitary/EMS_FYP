@@ -60,7 +60,7 @@ export default function NavMenu() {
                 <div className="hidden md:flex space-x-6">
                     <NavLink to="/" className={navState}>Home</NavLink>
                     <NavLink to="/events" className={navState}>Events</NavLink>
-                    <NavLink to="/about" className={navState}>About</NavLink>
+                    <NavLink to="/about-us" className={navState}>About</NavLink>
                     <NavLink to="/contact" className={navState}>Contact</NavLink>
                 </div>
 
