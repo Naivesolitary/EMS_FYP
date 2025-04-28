@@ -4,7 +4,7 @@ const asyncErrorHandler = require('../utils/asyncErrorHandler');
 const sendResponse = require('../utils/sendResponse')
 const ApiError = require('../utils/ApiError')
 require('dotenv').config();
-const {saveUser,getUser,getAllUser, getUserByid,addToBlacklist,getBlacklist,cleanupExpiredTokens}  = require('../models/userModel')
+const {saveUser,getUser,getAllUser, getUserByid,addToBlacklist,getBlacklist,cleanupExpiredTokens,verificationInfo}  = require('../models/userModel')
 const {generateToken,generateRefreshToken} = require('../middlewares/jwtAuth')
 
 const allUsers = asyncErrorHandler(async(req,res) => {
@@ -18,13 +18,27 @@ const allUsers = asyncErrorHandler(async(req,res) => {
 });
 const createUser =  asyncErrorHandler(async (req,res) => {
    
-
-        const user = req.body;
+        const user = req.body
+        const {pdfPath} = req.body
+        // const { name, email, password, phone, role } = req.body;
+        console.log("sign up data: ",req.body)
         const saltsRound = 10; // Password hashing
         const hashedPassword = await bcrypt.hash(user.password,saltsRound)
         user.password = hashedPassword;
         const userData = await saveUser(user)
+        const {id} = userData
+        // console.log("ID ;;: " , id)
         if(!userData) throw new ApiError(500,'Signup failed')
+        if(pdfPath){
+            try{
+               const result = await verificationInfo(id,pdfPath)
+               console.log("PDF section result: ", result)
+
+            }catch(err) {
+                console.error("Error while publishing verification data: ", err)
+
+            }
+        }
         const payload = {id:userData.user_id,email: userData.email,role:userData.role}
         const accessToken = generateToken(payload);
         const refreshToken = generateRefreshToken(payload);
@@ -39,6 +53,14 @@ const createUser =  asyncErrorHandler(async (req,res) => {
 })
 
 //     Refresh Token
+
+const test = async(req,res) =>{
+
+    const user_id = req.params.id
+    const {pdfPath} = req.body
+    const result = await verificationInfo(user_id,pdfPath)
+    sendResponse(res,{data:result})
+}
 
 const newAccessToken = asyncErrorHandler(async(req,res) => {
    
@@ -176,5 +198,5 @@ const logout = asyncErrorHandler(async(req,res) => {
 module.exports = {
 createUser, verifyUser,
 allUsers,viewProfile,
- newAccessToken, logout,getUserById
+ newAccessToken, logout,getUserById,test
 }

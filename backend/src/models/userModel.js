@@ -44,7 +44,10 @@ const cleanupExpiredTokens = async() => {
 
 
 
-
+const verificationInfo = async(user_id,verification_notes) =>{
+    const [result] = db.execute(`INSERT INTO organizer_verification (user_id,verification_notes) VALUES (?,?)`,[user_id,verification_notes])
+    return result
+}
 
  
 
@@ -85,5 +88,5 @@ const getUser = async(data) => {
 module.exports = {
     saveUser, getUser, getAllUser
     ,getUserByid,getBlacklist,addToBlacklist,
-    cleanupExpiredTokens
+    cleanupExpiredTokens,verificationInfo
 }

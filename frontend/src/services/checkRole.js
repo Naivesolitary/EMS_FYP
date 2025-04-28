@@ -8,3 +8,14 @@ export const checkRole = (user) => {
     return true
 
 }
+
+export const isAdmin = (user) => {
+    const allowedRoutes = ['admin']
+    
+    if(!user || !allowedRoutes.includes(user.role)){
+         return false
+    }
+
+    return true
+
+}

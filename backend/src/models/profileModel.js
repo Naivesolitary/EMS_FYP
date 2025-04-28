@@ -2,7 +2,7 @@ const  db = require('../config/db')
 
 const getUserInfo = async(user_id) => {
   
-    const [result] = await db.execute(`SELECT u.name,u.email,u.phone,p.image_url FROM users u JOIN profile_images p
+    const [result] = await db.execute(`SELECT u.name,u.email,u.phone,u.role,p.image_url FROM users u JOIN profile_images p
       ON u.user_id = p.user_id WHERE u.user_id = ?  `,[user_id])
     // return result[0]
     return result[0]

@@ -7,6 +7,7 @@ import Cloud from '../images/Cloud.png';
 import { useAuth } from '../context/AuthContext';
 import useLogout from '../hooks/useLogout';
 import { IoIosNotificationsOutline as Notification } from "react-icons/io";
+import { checkRole,isAdmin } from '../services/checkRole';
 
 export default function NavMenu() {
     const { auth } = useAuth();
@@ -28,6 +29,11 @@ export default function NavMenu() {
     const handleViewProfile = () => {
         setIsDropdownOpen(false);
         navigate('/profile');
+    };
+
+    const handleViewDashboard = () => {
+        setIsDropdownOpen(false);
+        navigate('/dashboard');
     };
 
     // Click outside to close
@@ -79,6 +85,19 @@ export default function NavMenu() {
 
                             {isDropdownOpen && (
                                 <div className="absolute right-0 top-14 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                                  {auth || isAdmin(auth.user) ? (
+                                    <button
+                                        onClick={handleViewDashboard}
+                                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                                    >
+                                        Dashboard
+                                    </button>
+                                  ):( null
+
+                                  )
+                                  
+                                  
+                                  }
                                     <button
                                         onClick={handleViewProfile}
                                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"

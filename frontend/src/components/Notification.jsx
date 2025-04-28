@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { FiCheck, FiX } from "react-icons/fi";
 
-const Notification = ({ message, type, onClose, duration = 5000 }) => {
+const Notification = ({ message, success, onClose, duration = 5000 }) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       onClose();
@@ -10,10 +10,10 @@ const Notification = ({ message, type, onClose, duration = 5000 }) => {
     return () => clearTimeout(timer);
   }, [onClose, duration]);
 
-  const bgColor = type === "success" ? "bg-green-100" : "bg-red-100";
-  const textColor = type === "success" ? "text-green-800" : "text-red-800";
-  const borderColor = type === "success" ? "border-green-300" : "border-red-300";
-  const icon = type === "success" ? <FiCheck className="w-5 h-5" /> : <FiX className="w-5 h-5" />;
+  const bgColor = (success) ? "bg-green-100" : "bg-red-100";
+  const textColor = (success) ? "text-green-800" : "text-red-800";
+  const borderColor = (success) ? "border-green-300" : "border-red-300";
+  const icon = (success) ? <FiCheck className="w-5 h-5" /> : <FiX className="w-5 h-5" />;
 
   return (
     <div

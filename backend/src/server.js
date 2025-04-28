@@ -11,6 +11,7 @@ const errorHandler = require('../src/middlewares/errorHandler')
 const {updateProfile} = require('../src/controllers/profileController')
 const profileRoutes = require('./routes/profileRoutes')
 const uploadRoutes = require('./routes/uploadRoutes')
+const dashboardRoutes = require('../src/routes/dashboardRoutes'  )
 
 // app.use(cors())
 app.use(cors({
@@ -29,6 +30,7 @@ app.use('/api/events',eventRoutes);
 app.use('/api/payment',paymentRoutes);
 app.use('/api/upload',uploadRoutes)
 app.use('/api/users',profileRoutes)
+app.use('/api/dashboard',dashboardRoutes)
 
 app.use(errorHandler)
 

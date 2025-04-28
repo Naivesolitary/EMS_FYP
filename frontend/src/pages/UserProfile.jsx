@@ -19,7 +19,7 @@ const UserProfile = () => {
   const [notification, setNotification] = useState({
     show: false,
     message: "",
-    type: "success" // or "error"
+    success: false // or "error"
   });
   const axiosPrivate = useAxiosPrivate()
   const [formData, setFormData] = useState({
@@ -31,11 +31,11 @@ const UserProfile = () => {
   })
 
 
-  const showNotification  = (message, type = "success") => {
+  const showNotification  = (message, success = true) => {
     setNotification({
       show:true,
       message,
-      type
+      success
     })
   }
   // const [user, setUser] = useState({
@@ -54,14 +54,23 @@ const UserProfile = () => {
     const getUserInfo = async() => {
       const response = await axiosPrivate.get(`/api/users/profile`);
       console.log("user-info: ", response.data.data)
-      const {name,email,phone,image_url} = response.data.data
+      const {name,email,phone,image_url,role} = response.data.data
+      const ROLE_DISPLAY_NAMES = {
+        event_organizer: "Event Organizer",
+        attendee: "Attendee",
+        admin: "Admin"
+      };
+
       // console.log("name: ",name, "email: ",email, "phone: ",phone, "password: ",password)
       setFormData(prev => ({
         ...prev, // Keep existing defaults
         username: name || "",
         email: email || "",
         phone: phone || "",
-        profileImage: image_url || "/placeholder.svg?height=200&width=200"
+        profileImage: image_url || "/placeholder.svg?height=200&width=200",
+        user_role: {
+          role: ROLE_DISPLAY_NAMES[role] ?? userRole
+        }
       }));
       
     }
@@ -161,7 +170,8 @@ useEffect(() => {
        }
 
        const response = await axiosPrivate.put('/api/users/profile',updateData)
-       showNotification("Profile updated successfully")
+       const {message,success} = response.data
+       showNotification(message,success)
       //  console.log("Profile updated successfully: ", response.data)
 
        setUser(updateData)
@@ -224,7 +234,7 @@ useEffect(() => {
       {notification.show && (
         <Notification
           message={notification.message}
-          type={notification.type}
+          success={notification.success}
           onClose={() => setNotification({...notification,show:false})}
         />
       )}
@@ -306,6 +316,19 @@ useEffect(() => {
                     {isEditing ? " Save" : " Edit"}
                   </button>
                 </div>
+
+                
+
+                <div className="mb-4">
+                  <label className="flex items-center gap-2 mb-1.5 text-sm text-gray-600">
+                    <FiUser className="text-blue-600 w-4 h-4" />
+                    <span>Role</span><span>{formData.user_role?.role}</span>
+                  </label>
+                  
+                
+                </div>
+
+                
 
                 <div className="mb-4">
                   <label className="flex items-center gap-2 mb-1.5 text-sm text-gray-600">

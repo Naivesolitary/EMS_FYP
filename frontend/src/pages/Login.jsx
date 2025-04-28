@@ -3,15 +3,30 @@ import axios from "../services/axios"
 import {useAuth}  from "../context/AuthContext"
 import { useState } from "react"
 import { FiEye, FiEyeOff, FiMail, FiLock } from "react-icons/fi"
-import { Link, } from "react-router-dom"
+import { Link,useNavigate } from "react-router-dom"
+import Notification from "../components/Notification"
 
 const Login = ({ onSwitchToSignup }) => {
   const {login} = useAuth()
+  const navigate = useNavigate()
   const [showPassword, setShowPassword] = useState(false)
+  const [notification, setNotification] = useState({
+    show: false,
+    message: "",
+    success: false // or "error"
+  });
   const [loginForm, setLoginForm] = useState({
     email: "",
     password: "",
   })
+
+  const showNotification  = (message, success = true) => {
+    setNotification({
+      show:true,
+      message,
+      success
+    })
+  }
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -37,12 +52,29 @@ const Login = ({ onSwitchToSignup }) => {
     const response =  await axios.post(`${BASE_URL}/api/auth/login`, loginForm, { withCredentials: true })
     console.log(response)
     const {payload,tokens} = response.data.data
+    const {message,success} = response.data
+    console.log("Message: ", message , "Success: ",success)
     
     login(payload,tokens.accessToken)
+    showNotification(message,success)
+    if (success) {
+      setTimeout(() => {
+        navigate("/");
+      }, 2000); // 
+    }
+   
+
   }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
+        {notification.show && (
+        <Notification
+          message={notification.message}
+          success={notification.success}
+          onClose={() => setNotification({...notification,show:false})}
+        />
+      )}
       <div className="w-full max-w-md space-y-8 rounded-2xl bg-white p-8 shadow-lg">
         <div className="text-center">
           <h2 className="text-3xl font-bold tracking-tight text-gray-900">Welcome Back</h2>

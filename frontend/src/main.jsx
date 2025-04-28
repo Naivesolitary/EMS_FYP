@@ -16,6 +16,8 @@ import PaymentFailed from './pages/PaymentFailed.jsx'
 import PaymentSuccess from './pages/PaymentSuccess.jsx'
 import { AuthProvider } from './context/AuthContext.jsx'
 import UserProfile from './pages/UserProfile.jsx'
+import AdminDashboard from './pages/Admin.jsx'
+import Admin from './pages/Admin.jsx'
 
 
 
@@ -52,6 +54,10 @@ const router = createBrowserRouter([
         path: 'create-event',
         element: <CreateEvent/>
       },
+      {
+        path: 'dashboard',
+        element: <AdminDashboard/>
+      },
     
       {
         path: '*',
@@ -68,13 +74,13 @@ const router = createBrowserRouter([
       {
         path:'profile',
         element:<UserProfile/>
+      }, 
+      {
+        path:'admin-dashboard',
+        element:<Admin/>
       }
-
-      
     
-    ]
-    
-  }
+    ]}
 ])
 
 createRoot(document.getElementById('root')).render(

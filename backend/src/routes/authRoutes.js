@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const {createUser,verifyUser,allUsers,viewProfile,newAccessToken,logout,getUserById} = require('../controllers/userController');
+const {createUser,verifyUser,allUsers,viewProfile,newAccessToken,logout,getUserById,test} = require('../controllers/userController');
 const {jwtAuth} = require('../middlewares/jwtAuth')
 
 
@@ -10,6 +10,7 @@ router.route('/profile').get([jwtAuth,viewProfile]);
 router.route('/user/:id').get(getUserById);
 router.route('/refresh-token').post(newAccessToken);
 router.route('/logout').post([jwtAuth,logout])
+router.post('/test/:id',test)
 
 
 router.route('/login').post(verifyUser);

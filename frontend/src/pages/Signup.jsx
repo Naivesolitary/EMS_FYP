@@ -10,13 +10,31 @@ const Signup = ({ onSwitchToLogin }) => {
   const {signup} = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [emailError, setEmailError] = useState("")
+  // const [role,setRole] = useState("") // this is to track the role change in dropdown not to set for the form
   const [signupForm, setSignupForm] = useState({
     name: "",
     email: "",
     password: "",
     phone: "",
     role: "attendee",
+    pdfPath:"",
   })
+  const [pdfFile, setPdfFile] = useState(null);
+
+  // useEffect(()=> {
+  //   if(signupForm.role !=="event_organizer"){
+  //     setSignupForm(prev => ({...prev,pdfPath:""}))
+  //   }
+  // },[signupForm.role])
+
+const handleFileChange = (e) => {
+  const file = e.target.files[0];
+  if (file && file.type === "application/pdf") {
+    setPdfFile(file);
+  } else {
+    alert("Please upload a valid PDF file.");
+  }
+};
 
   // console.log(signupForm)
 
@@ -41,13 +59,54 @@ const Signup = ({ onSwitchToLogin }) => {
     })
   }
 
-  const handleSubmit = (e) => {
+  const handleCancelPdf = () => {
+    setPdfFile(null);
+    setSignupForm(prev => ({ ...prev, pdfPath: "" }));
+  };
+
+  const handleSubmit =  async(e) => {
     e.preventDefault()
     if (validateEmail(signupForm.email)) {
       console.log("Signup form submitted:", signupForm)
+      let pdfPath = null;
+      if (pdfFile) {
+        try {
+            const pdfFormData = new FormData();
+            pdfFormData.append("pdf", pdfFile);
+
+            // Upload PDF file
+            const pdfUploadResponse = await axios.post(
+                `${BASE_URL}/api/upload/verification`, // Upload route for PDF
+                pdfFormData,
+                { headers: { "Content-Type": "multipart/form-data" } }
+            );
+
+            // Extract the PDF path from the response
+            pdfPath = pdfUploadResponse.data.filePath;// return some like this: /uploads/verification/pdf-1745833978221-511708361.pdf// Add the PDF path to the form data
+           
+              console.log("Pdf:",pdfPath) 
+          
+        } catch (error) {
+            console.error("Error uploading PDF:", error);
+            return; // Stop execution if the PDF upload fails
+        }
+    }
+
+    const formDataToSend = {
+      ...signupForm,pdfPath:pdfPath || "",
+    }
+    console.log("Signup Form",signupForm)
+    // Add the PDF path to the formData if the PDF was uploaded
+   
+      
       // Add your signup logic here
       try {
-        handleSignup()
+        const response =   await axios.post(`${BASE_URL}/api/auth/signup`, formDataToSend,{withCredentials: true })
+        const {payload,tokens} = response.data.data
+        console.log("Signup successful user Data:", payload)
+        console.log("Signup successful Token Data:", tokens)
+        signup(payload,tokens.accessToken)
+        // handleSignup()
         // Optionally, reset form or redirect
       } catch (error) {
         console.error("Signup error:", error)
@@ -55,17 +114,10 @@ const Signup = ({ onSwitchToLogin }) => {
     }
     
   }
+
+
   
 
-  const handleSignup = async() => {
-    const response =   await axios.post(`${BASE_URL}/api/auth/signup`, signupForm, { withCredentials: true })
-    const {payload,tokens} = response.data.data
-    console.log("Signup successful user Data:", payload)
-    console.log("Signup successful Token Data:", tokens)
-    
-    signup(payload,tokens.accessToken)
-
-  }
 
 
   return (
@@ -184,6 +236,33 @@ const Signup = ({ onSwitchToLogin }) => {
                 </select>
               </div>
             </div>
+            {/* Conditional rendering for PDF upload */}
+{signupForm.role === "event_organizer" && (
+  <div>
+    <label htmlFor="pdf" className="flex items-center text-sm font-medium text-gray-700">
+      Upload Event PDF
+    </label>
+    <div className="mt-1 flex items-center gap-2">
+      <input
+        id="pdf"
+        name="pdf"
+        type="file"
+        accept=".pdf"
+        onChange={handleFileChange}
+        className="block w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-gray-900 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/30"
+      />
+      {pdfFile && (
+        <button
+          type="button"
+          onClick={handleCancelPdf}
+          className="text-red-500 underline text-sm"
+        >
+          Cancel
+        </button>
+      )}
+    </div>
+  </div>
+)}
           </div>
 
           <div>
