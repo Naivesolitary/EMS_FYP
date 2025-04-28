@@ -12,6 +12,8 @@ const {updateProfile} = require('../src/controllers/profileController')
 const profileRoutes = require('./routes/profileRoutes')
 const uploadRoutes = require('./routes/uploadRoutes')
 const dashboardRoutes = require('../src/routes/dashboardRoutes'  )
+const sendMail= require('../src/controllers/mailController')
+const contactRoutes = require('../src/routes/contactRoutes')
 
 // app.use(cors())
 app.use(cors({
@@ -31,6 +33,7 @@ app.use('/api/payment',paymentRoutes);
 app.use('/api/upload',uploadRoutes)
 app.use('/api/users',profileRoutes)
 app.use('/api/dashboard',dashboardRoutes)
+app.use('/api/contact',contactRoutes)
 
 app.use(errorHandler)
 

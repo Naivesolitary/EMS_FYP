@@ -1,21 +1,45 @@
-"use client";
+
 
 import { useState } from "react";
 import { FiSend } from "react-icons/fi"; // Send Icon
 import { FaSpinner } from "react-icons/fa"; // Spinner Icon
+import axios from "../services/axios"
 
 export function ContactForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    subject: "",
+    message: ""
+  });
 
-  const handleSubmit = async () => {
+  const handleChange = (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value
+    }));
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate form submission
-    setTimeout(() => {
+    try {
+      const response = await axios.post("/api/contact/send-mail", formData);
+
+      if (response.status === 200) {
+        alert("Message sent successfully!");
+        setFormData({ name: "", email: "", subject: "", message: "" }); // clear form
+      } else {
+        alert("Failed to send message. Please try again.");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("An error occurred while sending the message.");
+    } finally {
       setIsSubmitting(false);
-      // Handle real form submission here
-    }, 1500);
+    }
   };
 
   return (
@@ -30,6 +54,9 @@ export function ContactForm() {
             </label>
             <input
               id="name"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
               placeholder="John Smith"
               className="h-11 w-full rounded-lg border border-gray-200 bg-gray-50/50 px-4 text-gray-900 placeholder:text-gray-400 focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
               required
@@ -42,7 +69,10 @@ export function ContactForm() {
             </label>
             <input
               id="email"
+              name="email"
               type="email"
+              value={formData.email}
+              onChange={handleChange}
               placeholder="john@example.com"
               className="h-11 w-full rounded-lg border border-gray-200 bg-gray-50/50 px-4 text-gray-900 placeholder:text-gray-400 focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
               required
@@ -50,33 +80,24 @@ export function ContactForm() {
           </div>
         </div>
 
-        {/* <div className="space-y-2">
-          <label htmlFor="phone" className="text-sm font-medium text-gray-700">
-            Phone Number
-          </label>
-          <input
-            id="phone"
-            type="tel"
-            placeholder="+1 (555) 000-0000"
-            className="h-11 w-full rounded-lg border border-gray-200 bg-gray-50/50 px-4 text-gray-900 placeholder:text-gray-400 focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-          />
-        </div> */}
-
         <div className="space-y-2">
           <label htmlFor="subject" className="text-sm font-medium text-gray-700">
             Subject
           </label>
           <select
             id="subject"
+            name="subject"
+            value={formData.subject}
+            onChange={handleChange}
             className="h-11 w-full rounded-lg border border-gray-200 bg-gray-50/50 px-4 text-gray-900 focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
             required
           >
             <option value="">Select a subject</option>
-            <option value="general">General Inquiry</option>
-            <option value="booking">Event Booking</option>
-            <option value="pricing">Pricing Information</option>
-            <option value="support">Technical Support</option>
-            <option value="feedback">Feedback</option>
+            <option value="General Inquiry">General Inquiry</option>
+            <option value="Event Booking">Event Booking</option>
+            <option value="Pricing Information">Pricing Information</option>
+            <option value="Technical Support">Technical Support</option>
+            <option value="Feedback">Feedback</option>
           </select>
         </div>
 
@@ -86,6 +107,9 @@ export function ContactForm() {
           </label>
           <textarea
             id="message"
+            name="message"
+            value={formData.message}
+            onChange={handleChange}
             placeholder="Tell us how we can help you..."
             className="min-h-[120px] w-full rounded-lg border border-gray-200 bg-gray-50/50 px-4 py-3 text-gray-900 placeholder:text-gray-400 focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
             required
