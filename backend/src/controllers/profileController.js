@@ -44,8 +44,8 @@ const userInfo = asyncErrorHandler(async(req,res,next) => {
 
 
 const favorites = asyncErrorHandler(async(req,res) => {
-  // const userId = req.decoded.id;
-  const userId = req.params.id;
+  const userId = req.decoded.id;
+  // const userId = req.params.id;
   const favs = await getFavorites(userId);
   console.log(favs)
   if(!favs) throw new ApiError(404,"User info not found");
@@ -54,8 +54,8 @@ const favorites = asyncErrorHandler(async(req,res) => {
 
 
 const bookings = asyncErrorHandler(async(req,res) => {
-  // const userId = req.decoded.id;
-  const userId = req.params.id;
+  const userId = req.decoded.id;
+  // const userId = req.params.id; -- FOR POSTMAN TESTING
   const bookingInfo = await getBookings(userId);
   console.log(bookingInfo)
   if(!bookingInfo) throw new ApiError(404," booking found or User  not found");
