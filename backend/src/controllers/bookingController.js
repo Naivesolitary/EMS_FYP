@@ -74,7 +74,7 @@ const sendResponse = require('../utils/sendResponse');
         const paymentData = {
           amount : calculatedTotal.toString(),
           tax_amount : "0",
-          total_amount : calculatedTotal.toString(),
+          total_amount : parseFloat(calculatedTotal).toString(),
           transaction_uuid,
           product_code : process.env.ESEWA_PRODUCT_CODE,
           product_service_charge: "0",
@@ -86,13 +86,13 @@ const sendResponse = require('../utils/sendResponse');
 
         }
         // console.log("hello World")
-
-        const message = `total_amount=${paymentData.total_amount},transaction_uuid=${paymentData.transaction_uuid},product_code=${paymentData.product_code}`
+        const sanitizedTotalAmount = paymentData.total_amount.replace(/,/g, '');
+        const message = `total_amount=${sanitizedTotalAmount},transaction_uuid=${paymentData.transaction_uuid},product_code=${paymentData.product_code}`
         const hash = CryptoJS.HmacSHA256(message,process.env.ESEWA_SECRET);
         const hashedSignature = CryptoJS.enc.Base64.stringify(hash);
         paymentData.signature = hashedSignature
 
-        console.log(paymentData)
+        console.log("paymentData ==> ",paymentData)
 
     
         await conn.commit();
@@ -164,7 +164,7 @@ const paymentId = async (req, res) => {
   }
 
   const  isBooked = asyncErrorHandler( async(req,res) => {
-    const userId = req.decoded.id; // 
+    const userId = req.decoded.id; 
     // const userId = req.params.id; // FOR POSTMAN TESTING
     const { event_id } = req.body;
     const result = await checkBooking(userId,event_id)

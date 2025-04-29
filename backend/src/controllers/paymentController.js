@@ -48,8 +48,8 @@ const verifyPayment = async(req,res,next) => {
 
                   await updatePaymentStatus('paid',transaction_uuid,);
                  await updateBookingStatus('confirmed',booking_id);
-                 const payment_id = await getPaymentId(booking_id)
-                 await addPaymentId(booking_id,payment_id)
+                //  const payment_id = await getPaymentId(booking_id)
+                //  await addPaymentId(booking_id,payment_id)
                 return res.redirect(`${process.env.FRONTEND_URL}/payment-success`)
 
 
