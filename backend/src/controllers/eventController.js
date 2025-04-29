@@ -2,7 +2,7 @@ const sendResponse = require('../utils/sendResponse');
 const ApiError = require('../utils/ApiError');
 const path = require('path')
 const asyncErrorHandler = require('../utils/asyncErrorHandler')
-const {event,eventById, allEvents,eventUpdate,deleteEventById,insertImages,getImages} = require('../models/eventModel')
+const {event,eventById, allEvents,eventUpdate,deleteEventById,insertImages,getImages,addFavs,deleteFavs} = require('../models/eventModel')
 const {createTicket,getTicketInfo} = require('../models/ticketModel')
 
 //  creates an Event 
@@ -43,6 +43,20 @@ const createEvent = asyncErrorHandler(async (req,res,next) => {
     
 })
 
+const favorites = asyncErrorHandler(async(req,res,next) => {
+    const {userId,eventId} = req.body
+     let result;
+     
+     if (req.method === 'POST'){
+         result = await addFavs(eventId,userId)
+     }else if (req.method === 'DELETE') {
+         result = await deleteFavs(eventId,userId);
+         
+     }else{
+        return res.status(405).json({ success: false, message: "Method Not Allowed" });
+     }
+     sendResponse(res,{data:result})
+})
 
 
 //  get all the events
@@ -138,6 +152,6 @@ module.exports = {
     updateEvent,
     deleteEvent,
     ticket,
-    images
+    images,favorites
 
 }

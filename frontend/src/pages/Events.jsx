@@ -4,10 +4,13 @@ import Moon from '../images/Moon.png';
 import Cloud from '../images/Cloud.png';
 import ClipLoader from 'react-spinners/ClipLoader';
 import axios, { axiosPrivate } from  '../services/axios'
+import {useAuth} from '../context/AuthContext'
 
 import {BASE_URL} from '../config'
 import { useState, useEffect } from 'react';
-import { FaCalendarAlt, FaMapMarkerAlt, FaSearch, FaArrowLeft, FaArrowRight, FaDAndDBeyond, FaGlideG } from 'react-icons/fa';;
+import { FaCalendarAlt, FaMapMarkerAlt, FaSearch, FaArrowLeft, FaArrowRight, FaDAndDBeyond, FaGlideG,FaRegHeart, FaHeart } from 'react-icons/fa';;
+
+
 import { EventModal } from '../components/EventModal'; // Add this import
 import Booking from './Booking'
 
@@ -17,20 +20,25 @@ import Booking from './Booking'
 //  
 
 export default function Events() {
-  
+  const {auth} = useAuth()
+  const {user} = auth
   const [events, setEvents] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [currentLot, setCurrentLot] = useState(0);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [selectedRawEvent, setSelectedRawEvent] = useState(null);
+  const [favoriteEvents, setFavoriteEvents] = useState([]);
   const [tickets,setTickets] = useState([]);
   const [isLoadingTickets, setIsLoadingTickets] = useState(true);
   const [modalType, setModalType] = useState(null); // 'view' or 'book'
 
  
+
+  console.log("Fav events: ", favoriteEvents)
   const [isModalOpen, setIsModalOpen] = useState(false);
   const eventsPerLot = 5;
+  // console.log(user.id)
 
 
 
@@ -53,6 +61,38 @@ export default function Events() {
   
     loadEvents();
   }, []);
+
+  const toggleFavorite = async (eventId) => {
+    setFavoriteEvents(prevFavorites => {
+     const updatedFavorites = prevFavorites.includes(eventId)
+        ? prevFavorites.filter(id => id !== eventId) // remove if already favorite
+        : [...prevFavorites, eventId] // add if not
+
+        localStorage.setItem('favorites',JSON.stringify(updatedFavorites))
+        return updatedFavorites
+      });
+      try {
+        const isFavorite = favoriteEvents.includes(eventId);
+        await fetch('/api/events/favorites', {
+          method: isFavorite ? 'DELETE' : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ eventId,userId :user.id }),
+        });
+      } catch (err) {
+        console.error('Failed to update favorites:', err);
+      }
+
+    
+  };
+
+  useEffect(() => {
+    const storedFavorites = JSON.parse(localStorage.getItem('favorites')) || [];
+    setFavoriteEvents(storedFavorites);
+  }, []);
+  
+  
+
+  
 
 
 
@@ -295,7 +335,20 @@ return () => {
                             className="object-cover w-full h-full"
                           />
                           )}
+                           {/* Heart Icon Button */}
+      <button
+        onClick={() => toggleFavorite(event.event_id)}
+        className="absolute top-2 right-2 text-gray-500 hover:text-red-500 focus:outline-none"
+      >
+        {favoriteEvents.includes(event.event_id) ? (
+          <FaHeart className="text-red-500" size={24} />
+        ) : (
+          <FaRegHeart className="text-emerald-400" size={24} />
+        )}
+      </button>
+                          
                       </div>
+                      
 
                       <div className="p-6">
                         <h2 className="text-xl font-bold text-gray-800 mb-2 line-clamp-1">{event.title}</h2>

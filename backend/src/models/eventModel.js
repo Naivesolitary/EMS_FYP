@@ -81,6 +81,23 @@ const getImages = async (event_id) => {
 }
 
 
+const addFavs = async(event_id,user_id) => {
+  const [result] = await db.execute('INSERT IGNORE INTO favorites (user_id, event_id) VALUES (?, ?)',
+      [user_id, event_id])
+
+      return result
+
+}
+
+
+const deleteFavs = async(event_id,user_id) => {
+  const [result] = await db.execute('DELETE FROM favorites WHERE user_id = ? AND event_id = ?',
+      [user_id, event_id])
+      return result
+
+}
+
+
 // ---------------------------- GET ALL EVENTS -----------------------//
 const allEvents = async () => {
   const [events] = await db.execute(`   SELECT 
@@ -180,5 +197,5 @@ module.exports = {
   eventUpdate,
   deleteEventById,
   insertImages,
-  getImages
+  getImages,addFavs,deleteFavs
 };
