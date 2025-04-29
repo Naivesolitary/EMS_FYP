@@ -46,6 +46,7 @@ const verifyPayment = async(req,res,next) => {
                     return res.redirect(`${process.env.FRONTEND_URL}/payment-failed`);
                   }
 
+                  console.log('Signature: ', signature, "Expected Signature: " ,expectedSignature );
                   await updatePaymentStatus('paid',transaction_uuid,);
                  await updateBookingStatus('confirmed',booking_id);
                 //  const payment_id = await getPaymentId(booking_id)

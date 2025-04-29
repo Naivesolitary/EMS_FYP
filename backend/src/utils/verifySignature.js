@@ -26,7 +26,7 @@ const generateSignature = (data, secretKey) => {
     const signaturePayload = fieldNames.map(field => {
         // Remove comma from total_amount if needed
         return `${field}=${field === 'total_amount' ? data[field].replace(/,/g, '') : data[field]}`;
-    }).join(','); // ✅ JOIN IT INTO A STRING HERE
+    }).join(','); //  JOIN IT INTO A STRING HERE
 
     console.log("Signature Payload String:", signaturePayload);
 
