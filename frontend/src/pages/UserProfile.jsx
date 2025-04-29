@@ -22,6 +22,22 @@ const UserProfile = () => {
     success: false // or "error"
   });
   const axiosPrivate = useAxiosPrivate()
+  const [user, setUser] = useState({})
+  const [favouriteEvents, setFavouriteEvents] = useState([]);
+  const [bookedEvents, setBookedEvents] = useState([]);
+  const [activeTab, setActiveTab] = useState("profile")
+  const [isEditing, setIsEditing] = useState(false)
+
+  const [imageFile, setImageFile] = useState(null)
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false)
+  const [showNewPassword, setShowNewPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  })
+  const [passwordMatch, setPasswordMatch] = useState(true)
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -46,7 +62,7 @@ const UserProfile = () => {
   //   profileImage: "/placeholder.svg?height=200&width=200",
   // })  
   
-  const [user, setUser] = useState({})
+
 
 
 
@@ -84,32 +100,50 @@ useEffect(() => {
 
   console.log("USER: ",user)
 
+
+  useEffect(() => {
+       
+
+  },[user])
+
+
+  useEffect(() => {
+    const getUserFavorites = async () => {
+      try {
+        const response = await axiosPrivate.get("/api/users/profile/favorites");
+        setFavouriteEvents(response.data.data || []);
+      } catch (error) {
+        console.error("Error fetching favorites:", error);
+      }
+    };
+
+    const getUserBookings = async () => {
+      try {
+        const response = await axiosPrivate.get("/api/users/profile/bookings");
+        setBookedEvents(response.data.data || []);
+      } catch (error) {
+        console.error("Error fetching bookings:", error);
+      }
+    };
+
+    getUserFavorites();
+    getUserBookings();
+  }, []);
+
   // Sample events data
-  const [favouriteEvents, setFavouriteEvents] = useState([
-    { id: 1, name: "Summer Music Festival", date: "2023-07-15", location: "Central Park" },
-    { id: 2, name: "Tech Conference 2023", date: "2023-08-22", location: "Convention Center" },
-    { id: 3, name: "Food & Wine Expo", date: "2023-09-10", location: "Downtown Pavilion" },
-  ])
+  // const [favouriteEvents, setFavouriteEvents] = useState([
+  //   { id: 1, name: "Summer Music Festival", date: "2023-07-15", location: "Central Park" },
+  //   { id: 2, name: "Tech Conference 2023", date: "2023-08-22", location: "Convention Center" },
+  //   { id: 3, name: "Food & Wine Expo", date: "2023-09-10", location: "Downtown Pavilion" },
+  // ])
 
-  const [bookedEvents, setBookedEvents] = useState([
-    { id: 101, name: "Jazz Night", date: "2023-06-30", amount: "$45.00", ticketType: "VIP" },
-    { id: 102, name: "Art Exhibition", date: "2023-07-05", amount: "$25.00", ticketType: "General" },
-    { id: 103, name: "Theater Show", date: "2023-08-12", amount: "$60.00", ticketType: "Premium" },
-  ])
+  // const [bookedEvents, setBookedEvents] = useState([
+  //   { id: 101, name: "Jazz Night", date: "2023-06-30", amount: "$45.00", ticketType: "VIP" },
+  //   { id: 102, name: "Art Exhibition", date: "2023-07-05", amount: "$25.00", ticketType: "General" },
+  //   { id: 103, name: "Theater Show", date: "2023-08-12", amount: "$60.00", ticketType: "Premium" },
+  // ])
 
-  const [activeTab, setActiveTab] = useState("profile")
-  const [isEditing, setIsEditing] = useState(false)
 
-  const [imageFile, setImageFile] = useState(null)
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false)
-  const [showNewPassword, setShowNewPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [passwordData, setPasswordData] = useState({
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
-  })
-  const [passwordMatch, setPasswordMatch] = useState(true)
 
 
   console.log("Form Data: ", formData)
@@ -502,60 +536,89 @@ useEffect(() => {
             <div>
               <h2 className="text-lg font-semibold text-gray-800 mb-6">Favourite Events</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {favouriteEvents.map((event) => (
+              {favouriteEvents.length > 0 ? (
+                favouriteEvents.map((event) => (
                   <div
                     key={event.id}
                     className="bg-white border-2 border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-all hover:translate-y-[-2px] duration-300"
                   >
                     <div className="flex justify-between items-center mb-3">
-                      <h3 className="text-md font-medium text-gray-800">{event.name}</h3>
+                      <h3 className="text-md font-medium text-gray-800">{event.title}</h3>
                       <FiHeart className="text-red-500 text-lg" />
                     </div>
                     <div className="space-y-1.5 text-gray-600">
                       <p className="text-sm">
-                        <span className="font-medium">Date:</span> {event.date}
+                        <span className="font-medium">Date:</span> {new Date(event.start_datetime).toLocaleString()}
                       </p>
                       <p className="text-sm">
-                        <span className="font-medium">Location:</span> {event.location}
+                        <span className="font-medium">Location:</span> {event.address}
                       </p>
                     </div>
                   </div>
-                ))}
+                ))) : (
+                <p className="text-gray-500">You have no favorite events yet.</p>
+              )}
               </div>
             </div>
           )}
 
-          {activeTab === "bookings" && (
-            <div>
-              <h2 className="text-lg font-semibold text-gray-800 mb-6">Booked Events</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {bookedEvents.map((event) => (
-                  <div
-                    key={event.id}
-                    className="bg-white border-2 border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-all hover:translate-y-[-2px] duration-300"
-                  >
-                    <div className="mb-3">
-                      <h3 className="text-md font-medium text-gray-800">{event.name}</h3>
-                    </div>
-                    <div className="space-y-1.5 text-gray-600">
-                      <p className="text-sm">
-                        <span className="font-medium">Date:</span> {event.date}
-                      </p>
-                      <p className="text-sm">
-                        <span className="font-medium">Amount:</span> {event.amount}
-                      </p>
-                      <p className="text-sm">
-                        <span className="font-medium">Ticket Type:</span>{" "}
-                        <span className="inline-block px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full text-xs">
-                          {event.ticketType}
-                        </span>
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+{/*  {
+            "title": "Tool: Fear Inoculum World Tour 2025",
+            "booking_date": "2025-04-27T01:48:39.000Z",
+            "total_amount": "5000.00",
+            "ticket_type": "VIP"
+        }, */}
+        {activeTab === "bookings" && (
+  <div>
+    <h2 className="text-lg font-semibold text-gray-800 mb-6">Booked Events</h2>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {bookedEvents.length > 0 ? (
+        // Group by booking_id first
+        Object.values(
+          bookedEvents.reduce((acc, event) => {
+            if (!acc[event.booking_id]) {
+              acc[event.booking_id] = { ...event, ticket_types: [event.ticket_type] };
+            } else {
+              acc[event.booking_id].ticket_types.push(event.ticket_type);
+            }
+            return acc;
+          }, {})
+        ).map((groupedEvent) => (
+          <div
+            key={groupedEvent.booking_id}
+            className="bg-white border-2 border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-all hover:translate-y-[-2px] duration-300"
+          >
+            <div className="mb-3">
+              <h3 className="text-md font-medium text-gray-800">{groupedEvent.title}</h3>
             </div>
-          )}
+            <div className="space-y-1.5 text-gray-600">
+              <p className="text-sm">
+                <span className="font-medium">Date:</span> {new Date(groupedEvent.booking_date).toLocaleString()}
+              </p>
+              <p className="text-sm">
+                <span className="font-medium">Amount:</span> Rs {groupedEvent.total_amount}
+              </p>
+              <p className="text-sm">
+                <span className="font-medium">Ticket Types:</span>{" "}
+                {groupedEvent.ticket_types.map((type, index) => (
+                  <span
+                    key={index}
+                    className="inline-block px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full text-xs mr-2"
+                  >
+                    {type}
+                  </span>
+                ))}
+              </p>
+            </div>
+          </div>
+        ))
+      ) : (
+        <p className="text-gray-500">You have no bookings yet.</p>
+      )}
+    </div>
+  </div>
+)}
+
         </div>
       </div>
     </div>

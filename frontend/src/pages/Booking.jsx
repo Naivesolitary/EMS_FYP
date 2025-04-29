@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react"
 import { FiX, FiLoader, FiMinus, FiPlus, FiCalendar, FiMapPin, FiCreditCard, FiCheckCircle } from "react-icons/fi"
 import Payment from "./Payment";
+import { axiosPrivate } from "../services/axios";
 
 export default function  Booking({ isOpen, onClose, event, onSubmit }) {
   const {event_id, tickets} = event;
@@ -14,6 +15,7 @@ export default function  Booking({ isOpen, onClose, event, onSubmit }) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errors, setErrors] = useState({})
   const modalRef = useRef(null)
+  const [alreadyBooked, setAlreadyBooked] = useState(false);
 
   console.log("Console from Booking Modal , Event: ",event,tickets)
   console.log('selected tickects: ',selectedTickets)
@@ -22,6 +24,24 @@ export default function  Booking({ isOpen, onClose, event, onSubmit }) {
     console.log('remaining tickets before:', ticket.remaining_quantity)
   })
   
+ 
+
+// useEffect(() => {
+//   async function checkBooking() {
+//     if (event && event.event_id) {
+//       try {
+//         const response = await axiosPrivate(`/api/events/check-booking?event_id=${event.event_id}`);
+//         const data = await response.json();
+//         if (data.alreadyBooked) {
+//           setAlreadyBooked(true);
+//         }
+//       } catch (error) {
+//         console.error('Error checking booking status', error);
+//       }
+//     }
+//   }
+//   checkBooking();
+// }, [event]);
   
 
   // Calculate total amount
@@ -150,7 +170,23 @@ export default function  Booking({ isOpen, onClose, event, onSubmit }) {
     if (!validateForm()) return
     console.log('valid form.....')
 
-    setIsSubmitting(true)
+    try {
+      // 👇 First: check if user has already booked this event
+      const response = await axiosPrivate.post("/api/events/check-booking", {
+        event_id: event.event_id,   // Send current event id
+      });
+  
+      if (response?.data?.data?.alreadyBooked) {
+      
+        alert("You have already booked this event!");
+        setIsSubmitting(false);
+        return;
+      }
+    }catch(error){
+        console.error("Error while checking booking status: ", error)
+    }
+
+    
     try {
       const result = await onSubmit({
         fullName,

@@ -49,6 +49,20 @@ const reduceTicketQuantity = async(conn, ticket_id, quantity) =>{
 
   }
 
+
+  const checkBooking = async(user_id,event_id) => {
+    const [rows] = await db.execute(`SELECT COUNT(*) AS bookings
+      FROM bookings 
+    WHERE user_id = ? AND event_id = ? AND status != 'cancelled';`,[user_id,event_id])
+    console.log(rows[0])
+    // return rows[0]
+    if (rows[0].bookings > 0) {
+      return ({ alreadyBooked: true });
+    } else {
+      return ({ alreadyBooked: false });
+    }
+  }
+
 module.exports = {
   createBooking,
   insertBookingItem,
@@ -56,6 +70,7 @@ module.exports = {
   reduceTicketQuantity,
   updateBookingStatus,
   getPaymentId,
-  addPaymentId
+  addPaymentId,
+  checkBooking,
 };
 

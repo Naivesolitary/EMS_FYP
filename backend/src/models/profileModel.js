@@ -11,6 +11,20 @@ const getUserInfo = async(user_id) => {
 }
 
 
+const getFavorites = async(user_id) => {
+  const [result] = await db.execute(` SELECT e.title, e.start_datetime, v.address from events e join favorites f ON e.event_id = f.event_id JOIN venues v ON v.venue_id = e.venue_id WHERE f.user_id = ?`,[user_id])
+  return result;
+}
+
+
+const getBookings = async(user_id) => {
+  const [result] = await db.execute(` select e.title, b.booking_id, b.booking_date,b.total_amount, t.ticket_type from events e JOIN bookings b ON e.event_id = b.event_id JOIN tickets t ON t.event_id = e.event_id WHERE user_id = ?`,[user_id])
+  return result;
+}
+
+// SELECT e.title, e.start_datetime, v.address from events e join favorites f ON e.event_id = f.event_id JOIN venues v ON v.venue_id = e.venue_id WHERE f.user_id = 34; this is for favourites
+// select e.title, b.booking_date,b.total_amount, t.ticket_type from events e JOIN bookings b ON e.event_id = b.event_id JOIN tickets t ON t.event_id = e.event_id WHERE user_id = 34; this on for booked events by a user.
+
 
 
 const updateUser = async (userId, fields) => {
@@ -36,4 +50,4 @@ const uploadProfileImage = async (userId, imageUrl) => {
 };
 
 
-module.exports = {updateUser,uploadProfileImage,getUserInfo}
+module.exports = {updateUser,uploadProfileImage,getUserInfo,getFavorites,getBookings}

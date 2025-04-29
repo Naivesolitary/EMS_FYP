@@ -1,4 +1,5 @@
-const {updateBookingTotal,createBooking,reduceTicketQuantity,insertBookingItem,getPaymentId,addPaymentId} = require('../models/bookingModel');
+const {updateBookingTotal,createBooking,reduceTicketQuantity,insertBookingItem,getPaymentId,addPaymentId,checkBooking} = require('../models/bookingModel');
+
 const {getBookingId} = require('../models/paymentModel') 
 // const uuid4 = require('uuidv4')
 const { v4: uuidv4 } = require("uuid");
@@ -162,10 +163,17 @@ const paymentId = async (req, res) => {
     sendResponse(res,{data:{booking_id}})
   }
 
+  const  isBooked = asyncErrorHandler( async(req,res) => {
+    const userId = req.decoded.id; // 
+    // const userId = req.params.id; // FOR POSTMAN TESTING
+    const { event_id } = req.body;
+    const result = await checkBooking(userId,event_id)
+    console.log(result)
+    sendResponse(res,{data:result})
+  })
 
-  // const bookingStatus = async(req,res) => {
 
-  // }
+ 
   
   // DELETE /api/bookings/:id
   const cancelBooking = async (req, res) => {
@@ -185,7 +193,7 @@ const paymentId = async (req, res) => {
     cancelBooking,
     newBooking,
     booking_id,
-    paymentId
+    paymentId,isBooked
     
   };
   

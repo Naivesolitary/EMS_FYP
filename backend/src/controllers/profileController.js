@@ -3,7 +3,7 @@ const ApiError = require("../utils/ApiError");
 const asyncErrorHandler = require("../utils/asyncErrorHandler");
 const bcrypt = require('bcrypt')
 
-const { updateUser, uploadProfileImage ,getUserInfo} = require("../models/profileModel");
+const { updateUser, uploadProfileImage ,getUserInfo,getFavorites,getBookings} = require("../models/profileModel");
 
 const updateProfile = asyncErrorHandler(async (req, res, next) => {
   const userId = req.decoded.id;
@@ -43,23 +43,26 @@ const userInfo = asyncErrorHandler(async(req,res,next) => {
 })
 
 
-module.exports = {updateProfile,userInfo}
+const favorites = asyncErrorHandler(async(req,res) => {
+  // const userId = req.decoded.id;
+  const userId = req.params.id;
+  const favs = await getFavorites(userId);
+  console.log(favs)
+  if(!favs) throw new ApiError(404,"User info not found");
+   sendResponse(res,{data:favs,message:"Info fetched successfully!!"})
+})
 
-// import { updateUser, uploadProfileImage,getUserInfo } from "../models/profileModel";
 
-// export const updateProfile = async (req,res) => {
-//      try{
-//         const userId = req.decoded.id;
-//         const {name, email, phone, password} = req
+const bookings = asyncErrorHandler(async(req,res) => {
+  // const userId = req.decoded.id;
+  const userId = req.params.id;
+  const bookingInfo = await getBookings(userId);
+  console.log(bookingInfo)
+  if(!bookingInfo) throw new ApiError(404," booking found or User  not found");
+   sendResponse(res,{data:bookingInfo,message:"Info fetched successfully!!"})
+})
 
-//      }catch(err) {
-//         console.log("Error while updating profile: ",err)
-//      }
-// }
 
-// const viewProfile = async(req,res) => {
-//     const  user_id = 34
-//     const result = await getUserInfo(user_id)
-//     console.log(result)
-//     res.ok(200).json({result})
-// }
+module.exports = {updateProfile,userInfo,favorites,bookings}
+
+
